@@ -37,7 +37,7 @@ Takes one issue from `<issues-dir>/<NN>-<slug>.md` (issues directory per CLAUDE.
 
 ## 4. Review, two stages, fresh eyes
 
-**Stage A, spec compliance.** Dispatch a read-only subagent with no session history. Its entire input is the issue file path, the PRD path if any, and instructions to run `git diff` and `git status --porcelain` itself (from the app repo in a nested layout). Prompt shape:
+**Stage A, spec compliance.** Dispatch the `spec-reviewer` subagent (defined in `.claude/agents/spec-reviewer.md`, pinned to a high-effort model with fresh context). Its entire input is the issue file path and the PRD path if any; it runs `git diff` and `git status --porcelain` itself (from the app repo in a nested layout). Prompt shape:
 
 > Spec-compliance review only, not code quality. Read `<issue path>` (and `<prd path>`). Inspect the diff and any untracked files. For each requirement and acceptance criterion in the issue, report DELIVERED, PARTIAL, or MISSING with file:line evidence. Also flag anything implemented that the issue never asked for.
 

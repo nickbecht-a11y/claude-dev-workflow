@@ -39,7 +39,7 @@ Five standing seats. Each owns a failure class no other seat catches.
 
 ## Convening
 
-Dispatch all seats as **parallel subagents with fresh context**. Each receives only its charter, the brief path, and permission to explore the codebase read-only to check the plan against reality. No seat receives the session's framing of the plan; fresh eyes are the point (same principle as the spec review in `/implement`).
+Dispatch all seats as **parallel `boardroom-seat` subagents** (defined in `.claude/agents/boardroom-seat.md`, pinned to a high-effort model with fresh context). Each receives only its charter, the brief path, and permission to explore the codebase read-only to check the plan against reality. No seat receives the session's framing of the plan; fresh eyes are the point (same principle as the spec review in `/implement`).
 
 Per-seat prompt shape:
 
