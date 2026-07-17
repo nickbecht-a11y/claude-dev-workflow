@@ -30,9 +30,28 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
 - Prefer many thin slices over few thick ones
+- A slice named after a layer (schema, API, UI) is horizontal by definition — re-cut it
 </vertical-slice-rules>
 
-### 4. Quiz the user
+### 4. Re-cut for verticality (mandatory self-audit)
+
+Before showing anyone the breakdown, re-read your own draft and re-cut any horizontal slice. A slice is horizontal if any of these holds:
+
+- Its title or scope names a layer ("schema", "API", "the UI", "backend") instead of a capability someone can use.
+- Finishing it alone produces nothing a user action or a test can exercise end-to-end.
+- Its acceptance criteria are all internal structure, not observable behavior.
+- Nothing works until several of these slices land together.
+
+To re-cut: take the thinnest single user-observable behavior and drive THAT through every layer, instead of one layer across every behavior. Prefer a slice that does one real thing end-to-end — even hardcoded or ugly — over a "foundation" slice that does nothing observable.
+
+Example — the same feature, sliced two ways:
+
+- Horizontal (wrong): (1) create all tables, (2) build all API routes, (3) build the dashboard UI.
+- Vertical (right): (1) dashboard shows one real metric from a real row end-to-end, (2) add a second metric, (3) user can filter by date.
+
+Only slices that survive this pass go to the quiz.
+
+### 5. Quiz the user
 
 Present the proposed breakdown as a numbered list. For each slice, show:
 
@@ -44,13 +63,14 @@ Present the proposed breakdown as a numbered list. For each slice, show:
 Ask the user:
 
 - Does the granularity feel right? (too coarse / too fine)
+- Is any slice still horizontal — a layer rather than a usable behavior?
 - Are the dependency relationships correct?
 - Should any slices be merged or split further?
 - Are the correct slices marked as HITL and AFK?
 
 Iterate until the user approves the breakdown.
 
-### 5. Publish the issues
+### 6. Publish the issues
 
 For each approved slice, write a file `<issues-dir>/<NN>-<slug>.md` using the issue body template below, with `status: ready-for-agent` in a frontmatter block unless instructed otherwise.
 
