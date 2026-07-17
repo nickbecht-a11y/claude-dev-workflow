@@ -20,10 +20,11 @@ Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, 
 
 ## Install into a project
 
-1. Copy the skills into the project (or into `~/.claude/skills/` once, to get them in every project on the machine):
+1. Copy the skills and agents into the project (or into `~/.claude/` once, to get them in every project on the machine):
 
    ```sh
    cp -r skills/* <project>/.claude/skills/
+   cp -r agents/* <project>/.claude/agents/
    ```
 
 2. Copy `CLAUDE.md.template` to `<project>/.claude/CLAUDE.md` (or merge its sections into an existing CLAUDE.md) and fill in the **Project Profile** table. The skills reference those slots by name (dev server URL, test commands, issues directory, roles, repo layout) instead of hardcoding any one project's values.
@@ -45,6 +46,15 @@ Most skills are stack-agnostic. The exceptions:
 | `better-sqlite3-rebuild` | Node + better-sqlite3 | Delete if unused |
 
 `mobile-view` and `visual-spec` also contain fill-in tables meant to accumulate project-specific rules over time; they start empty here.
+
+## Model pinning
+
+Two steps run as fresh-context subagents with model and reasoning effort pinned in `agents/` (installed to `.claude/agents/`), so the expensive-to-miss reasoning always runs on a strong model no matter what your session is set to:
+
+- `spec-reviewer` — Stage A spec-compliance review inside `/implement`.
+- `boardroom-seat` — each seat of the `/boardroom` adversarial board.
+
+Both default to Opus at high effort. Retune via the `model:` / `effort:` frontmatter (`effort` takes `low`–`max`). Every other stage runs in your main session at whatever model you've set; nothing else is switched for you.
 
 ## Design principles (why it works)
 
