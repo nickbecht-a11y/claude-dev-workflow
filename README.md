@@ -20,11 +20,14 @@ Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, 
 
 ## Install into a project
 
-1. Copy the skills into the project (or into `~/.claude/skills/` once, to get them in every project on the machine):
+1. Copy the skills and agents into the project (or into `~/.claude/` once, to get them in every project on the machine):
 
    ```sh
    cp -r skills/* <project>/.claude/skills/
+   cp -r agents/* <project>/.claude/agents/
    ```
+
+   The `agents/` definitions back the fresh-context, model-pinned subagents that a few skills dispatch (`spec-reviewer` for `/implement` spec review, `boardroom-seat` for `/boardroom`, `ui-prototyper` for the `/prototype` UI branch). Skip this copy and those skills fall back to an unpinned in-session review.
 
 2. Copy `CLAUDE.md.template` to `<project>/.claude/CLAUDE.md` (or merge its sections into an existing CLAUDE.md) and fill in the **Project Profile** table. The skills reference those slots by name (dev server URL, test commands, issues directory, roles, repo layout) instead of hardcoding any one project's values.
 

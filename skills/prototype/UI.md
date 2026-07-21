@@ -43,15 +43,26 @@ Write down the plan in one line, in the prototype's location or a top-of-file co
 
 This works whether the user is here to push back or not.
 
-### 2. Generate radically different variants
+### 2. Generate radically different variants — via a fresh-context Fable pass
 
-Draft each variant. Hold each one to:
+The divergence is the entire value of this branch, and it dies if the generator is anchored on how *this* conversation already pictured the design. So the variants are not drafted in this session. Dispatch the `ui-prototyper` subagent (defined in `.claude/agents/ui-prototyper.md`, pinned to Fable with fresh context). Hand it a one-page brief and nothing else:
+
+- the page's purpose and the data it has access to (the props/shape, not this session's framing),
+- the host route and sub-shape (A or B),
+- N (default 3),
+- the contract below.
+
+Fresh context plus Fable is deliberate: it takes the brief and pushes it somewhere this session wouldn't, testing where the design could actually land rather than transcribing the assumed answer. The grill already resolved *what* to build; this pass explores *how it could look*, which is still open.
+
+Every returned variant must hold to:
 
 - The page's purpose and the data it has access to.
-- The project's component library / styling system (TailwindCSS, shadcn, MUI, plain CSS, whatever).
+- The project's component library / styling system (TailwindCSS, shadcn, MUI, plain CSS, whatever the agent finds by reading) and the project's design tokens.
 - A clear exported component name, e.g. `VariantA`, `VariantB`, `VariantC`.
 
-Variants must be **structurally different** — different layout, different information hierarchy, different primary affordance, not just different colours. Three slightly-tweaked card grids isn't a UI prototype, it's wallpaper. If two drafts come out too similar, redo one with explicit "do not use a card grid" guidance.
+Variants must be **structurally different** — different layout, different information hierarchy, different primary affordance, not just different colours. Three slightly-tweaked card grids isn't a UI prototype, it's wallpaper. If two come back too similar, send one back with explicit "do not use a card grid" guidance.
+
+The agent returns the variant set (a one-line concept plus a first-pass implementation per variant) and does not touch the working tree. You materialise its variants onto the route in the next steps.
 
 ### 3. Wire them together
 
