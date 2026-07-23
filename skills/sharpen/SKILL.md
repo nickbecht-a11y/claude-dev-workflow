@@ -1,9 +1,8 @@
 ---
 name: sharpen
 description: >
-  Post-work retrospective on the session itself, not the code. Scans for
-  friction, applies the cheapest fix that prevents it recurring, and logs
-  breadcrumbs so repeated friction can earn a new skill. Runs as the final
+  Post-work retrospective on the session itself, not the code, that turns
+  recurring friction into the cheapest durable fix. Runs as the final
   step of /finish-branch; also use when the user says "sharpen", "retro",
   "that felt rough", or asks what could have gone smoother.
 ---
@@ -37,7 +36,7 @@ Strict order. Take the first level that fully prevents the friction, never a hig
 1. **Nothing.** One-off, external cause, or already fixed in passing.
 2. **One line.** Add/fix a CLAUDE.md rule or pointer, or a memory file. Apply immediately.
 3. **Edit an existing skill.** Sharpen a trigger phrase, add a missed step, reorder steps to match reality, fix a stale path. This is how existing skills self-improve: the sharpen pass folds what actually happened back into the skill. Apply immediately.
-4. **New skill.** Only with repeat evidence (below), and only ever proposed to the user, never auto-created. If approved, `/write-a-skill` does the writing.
+4. **New skill.** Only with repeat evidence (below), and only ever proposed to the user, never auto-created. If approved, `/skill-creator` does the writing, under two rules: **baseline first** — watch an agent hit the friction *without* the skill before writing it, so it targets the real failure, not an imagined one; and **describe when, not what** — the skill's `description` names its triggering conditions, never a summary of its steps (a description that summarizes the workflow makes agents follow the summary and skip the skill body).
 
 ## 3. Breadcrumbs and the rule of three
 

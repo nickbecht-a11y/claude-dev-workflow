@@ -1,9 +1,9 @@
 ---
 name: qa-sweep
 description: >
-  Full-app QA run over live features: per-role Playwright walkthrough, DB
-  cross-checks, defect report, then immediate fixes for everything not
-  blocked on missing code. Use when asked to "QA", "test all features",
+  Full-app QA run over live features, ending in a defect report and
+  immediate fixes for everything not blocked on missing code. Use when
+  asked to "QA", "test all features",
   "run through the app", or after a large batch of changes lands. Distinct
   from /verify-feature (single feature) and /code-review (diff review).
 ---

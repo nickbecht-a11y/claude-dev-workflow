@@ -1,8 +1,8 @@
 ---
 name: finish-branch
 description: >
-  Close out the current feature branch: CI trio green, pre-merge sweep,
-  merge in the right order, then cleanup. Use when asked to finish, wrap up,
+  Close out the current feature branch through the skill's ordered gates.
+  Use when asked to finish, wrap up,
   land, or merge the branch, or to close out the feature.
 ---
 
@@ -20,7 +20,7 @@ Run the project's build, test, and lint commands (per CLAUDE.md's Project Profil
 ## 2. Pre-merge sweep
 
 - Completed issue files deleted from the issues directory? (`/implement` does this per issue; catch stragglers.)
-- Structurally significant change on this branch (new role, major UI section, table, storage bucket, service, integration)? Update the project's architecture docs/diagrams, if it keeps any.
+- Structurally significant change on this branch (new role, major UI section, table, storage bucket, service, integration)? Assess against the branch's full diff from its merge-base with the default branch (`git diff $(git merge-base <default> HEAD) HEAD`), never `HEAD~1` — a multi-commit branch is more than its last commit. Update the project's architecture docs/diagrams, if it keeps any.
 - `.claude/tasks/active.md` complete? Archive to `.claude/tasks/archive/`.
 - Uncommitted work: commit it now on the feature branch (in both repos if nested). Nothing merges dirty.
 

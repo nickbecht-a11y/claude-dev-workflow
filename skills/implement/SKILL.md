@@ -1,8 +1,8 @@
 ---
 name: implement
 description: >
-  Execute one issue file from the project issue tracker end to end: build,
-  prove, two-stage review, commit on the feature branch. Use when asked to
+  Take one issue file from the project issue tracker to a reviewed commit on
+  the feature branch, through the skill's mandatory gates. Use when asked to
   implement, build, do, or grab an issue ("implement issue 40", "do the next
   issue"), or when issues exist from /to-issues and the user says to start.
 ---
@@ -41,7 +41,7 @@ Takes one issue from `<issues-dir>/<NN>-<slug>.md` (issues directory per CLAUDE.
 
 > Spec-compliance review only, not code quality. Read `<issue path>` (and `<prd path>`). Inspect the diff and any untracked files. For each requirement and acceptance criterion in the issue, report DELIVERED, PARTIAL, or MISSING with file:line evidence. Also flag anything implemented that the issue never asked for.
 
-The subagent must not receive your summary of the work. Fresh eyes are the point: it reads what the issue says, not what you meant.
+The subagent must not receive your summary of the work. Fresh eyes are the point: it reads what the issue says, not what you meant. Do not pre-judge its findings either: never tell the reviewer what to downrate or skip ("don't flag the X we discussed", "treat Y as minor"). A finding you expect to be a false positive still surfaces, and you adjudicate it in the fix loop — pre-judging defeats the fresh eyes. If the issue was committed incrementally, have the reviewer diff from the branch's merge-base, never `HEAD~1` (which drops all but the last commit).
 
 **Stage B, code quality.** Run `/code-review` on the working diff.
 
