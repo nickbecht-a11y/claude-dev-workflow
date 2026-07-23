@@ -47,3 +47,5 @@ Delete the merged feature branch (confirm first, permission rule; both repos if 
 ## 6. Sharpen
 
 Run `/sharpen` on the whole branch's sessions while the context is still loaded. Its findings (or "clean run") append to the final report. This is the one moment with maximum evidence about how the workflow actually performed; don't skip it.
+
+Sharpen's applied fixes (CLAUDE.md lines, skill edits, log breadcrumbs) are working-tree changes on the now-merged default branch. Commit them before reporting (`chore(sharpen): <summary>`); if option 1 pushed, offer to push this commit too. Never end the skill with a dirty default branch — the next feature branch would inherit and mis-attribute it.

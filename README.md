@@ -10,9 +10,9 @@ A portable, seven-stage development workflow for Claude Code: 24 skills plus a C
 | 2. Explore (optional) | `frontend-design`, `prototype`, `visual-spec`, `boardroom` | Establish the visual direction for new UI; throwaway experiments; five-seat adversarial review for risky plans |
 | 3. PRD | `to-prd` | Synthesize the session into one requirements doc; no re-interviewing |
 | 4. Slice | `to-issues` | Vertical-slice (tracer bullet) issues in a local markdown tracker |
-| 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; loop-safe for unattended backlog runs |
+| 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; both review stages diff from the recorded issue base; UI slices without an approved visual spec route through `visual-spec` first; loop-safe for unattended backlog runs |
 | 6. Prove | `verify-feature` | Real browser, real role, screenshot as proof. No screenshot, not done |
-| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | Fresh-eyes spec review + code review, ordered merge, CI babysitting, retro |
+| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | Fresh-eyes spec review + code review, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
 
 Always on: `caveman` (compressed responses, ~75% fewer output tokens) and `track` (compaction-proof checklist, auto-fires on 5+ step plans, gates "done").
 
@@ -86,7 +86,8 @@ Most skills are stack-agnostic. The exceptions:
 
 - **CLAUDE.md is a router, not a manual.** Every line is either a rule the model can't derive from the code or a pointer that saves a search. One hop maximum. Skills self-describe via frontmatter, so CLAUDE.md only records their order and which gates are mandatory.
 - **Gates are a mechanism, not a memory.** `implement` chains build → prove → review in code, so verification can't be skipped by forgetting.
-- **Fresh eyes can't be fooled.** Spec review runs in a subagent with zero session history; it reads what the issue says, not what the implementer meant.
+- **Evidence before claims.** No "done", "fixed", or "passing" without having run the proving command this turn and read its output. A subagent's success report is a claim to verify against the diff, not proof.
+- **Fresh eyes can't be fooled.** Spec review runs in a subagent with zero session history reading the diff from the issue's recorded base commit; it reads what the issue says, not what the implementer meant, and never gets told what not to flag.
 - **Proof means a screenshot.** A feature is done when a real browser, driven as the right role, shows it working.
 - **Delete on completion.** Finished issues, plans, and boardroom briefs leave the working tree; git history is the archive. The live tree only describes the present.
 - **The system grows itself, slowly.** `sharpen` fixes workflow friction with the cheapest change that prevents recurrence; new skills need the same friction logged three times.

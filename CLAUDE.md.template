@@ -30,7 +30,7 @@ skills run in and which gates are mandatory.
 
 ## Output Folders
 
-Screenshots go in `screenshots/`, plans/PRDs/specs in `plans/`, handoff docs in `handoffs/` (all at repo root).
+Screenshots go in `screenshots/`, plans/PRDs/specs in `plans/`, handoff docs in `handoffs/`, QA reports in `qa-report/` (all at repo root).
 
 ## Communication Style
 
@@ -47,10 +47,12 @@ Evidence before claims. No "done", "fixed", "passing", or "works" — including 
 
 Red flags you're about to violate this: "should work now", "looks right", satisfaction before evidence ("Great!", "Perfect!"), or committing/pushing without a fresh run.
 
+Where the workflow assigns proof to the user (e.g. the pure-style eyeball), say "applied, awaiting your eyes" — that is not a done claim.
+
 ## Workflow
 
 1. `/grill-me` (new idea) or `/grill-with-docs` (touches existing domain concepts); a handoff doc or brief feeds the grill, answering most questions upfront
-2. `/frontend-design` first for any new UI (establish the visual language before design work); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS, applying the language from `/frontend-design`); `/boardroom` (optional, offered by `/to-prd` for sensitive plans): five-seat adversarial review, user rules on every concern
+2. `/frontend-design` first for any new UI (establish the visual language before design work; record what it establishes in `/visual-spec`'s auto-resolved table so later sections inherit it); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS); `/boardroom` (optional, offered by `/to-prd` for sensitive plans): five-seat adversarial review, user rules on every concern
 3. `/to-prd` then `/to-issues`
 4. `/implement` per issue. Chains the gates in order: build (`/tdd` for complex logic, `/new-migration` for schema) → `/verify-feature` (behavior changes; pure style skips the browser, user eyeballs) → two-stage review (fresh-context spec-compliance subagent, then `/code-review`) → delete issue file → commit on the feature branch
 5. `/finish-branch` when the branch is done: CI trio green, docs sweep, merge in the layout's required order, cleanup, then `/sharpen` (workflow friction review; cheapest-fix-first, new skills only on repeat evidence); after any push, `/watch-ci` offers to babysit Actions until green

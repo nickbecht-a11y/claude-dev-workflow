@@ -64,3 +64,4 @@ Per-seat prompt shape:
 - **Reject**: goes into the PRD's Out of Scope with the user's reason, so it never comes back as a fresh idea.
 - **Defer**: breadcrumb in `.claude/sharpen-log.md`.
 - Delete `plans/boardroom-<slug>.md` once its rulings are folded into the PRD (delete-on-completion rule).
+- **Standalone reviews** (an existing feature, no PRD queued): accepted concerns become issues via `/to-issues`; rejected ones still get written down with the reason (CONTEXT.md note or ADR) so they don't return as fresh ideas. Delete the brief once both are done.

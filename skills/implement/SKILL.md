@@ -20,6 +20,7 @@ Takes one issue from `<issues-dir>/<NN>-<slug>.md` (issues directory per CLAUDE.
 
 ## 1. Context
 
+- Record the issue base before any changes: `git rev-parse HEAD`. Both review stages diff from this SHA, so mid-issue commits stay in scope.
 - Read the issue file and its PRD (`prd-<slug>.md`) if one exists.
 - Read whatever architecture docs CLAUDE.md routes to for the areas the issue touches, if the project keeps any.
 - 5+ implementation steps: `/track` fires (standing rule). The track checklist is the ledger for this run; check off as you go.
@@ -28,6 +29,7 @@ Takes one issue from `<issues-dir>/<NN>-<slug>.md` (issues directory per CLAUDE.
 
 - Schema change needed: the project's migration skill (`/new-migration` on Supabase stacks). Never inline SQL against prod.
 - Complex logic or a new module: `/tdd` at the seams the issue names.
+- Issue designs or redesigns a page section with no approved visual spec: `/visual-spec` before any markup/CSS. The design stage being optional doesn't skip the lock; visual-spec's own rule is no HTML/CSS until the spec is approved.
 - Rhythm: lint and the touched test files as you go; the full suite once, at the end.
 
 ## 3. Prove
@@ -37,13 +39,13 @@ Takes one issue from `<issues-dir>/<NN>-<slug>.md` (issues directory per CLAUDE.
 
 ## 4. Review, two stages, fresh eyes
 
-**Stage A, spec compliance.** Dispatch the `spec-reviewer` subagent (defined in `.claude/agents/spec-reviewer.md`, pinned to a high-effort model with fresh context). Its entire input is the issue file path, the PRD path if any, and instructions to run `git diff` and `git status --porcelain` itself (from the app repo in a nested layout). Prompt shape:
+**Stage A, spec compliance.** Dispatch the `spec-reviewer` subagent (defined in `.claude/agents/spec-reviewer.md`, pinned to a high-effort model with fresh context). Its entire input is the issue file path, the PRD path if any, the issue base SHA from step 1, and instructions to run the diff and `git status --porcelain` itself (from the app repo in a nested layout). Prompt shape:
 
-> Spec-compliance review only, not code quality. Read `<issue path>` (and `<prd path>`). Inspect the diff and any untracked files. For each requirement and acceptance criterion in the issue, report DELIVERED, PARTIAL, or MISSING with file:line evidence. Also flag anything implemented that the issue never asked for.
+> Spec-compliance review only, not code quality. Read `<issue path>` (and `<prd path>`). Inspect the diff from `<issue base SHA>` (`git diff <sha>`) and any untracked files. For each requirement and acceptance criterion in the issue, report DELIVERED, PARTIAL, or MISSING with file:line evidence. Also flag anything implemented that the issue never asked for.
 
-The subagent must not receive your summary of the work. Fresh eyes are the point: it reads what the issue says, not what you meant. Do not pre-judge its findings either: never tell the reviewer what to downrate or skip ("don't flag the X we discussed", "treat Y as minor"). A finding you expect to be a false positive still surfaces, and you adjudicate it in the fix loop — pre-judging defeats the fresh eyes. If the issue was committed incrementally, have the reviewer diff from the branch's merge-base, never `HEAD~1` (which drops all but the last commit).
+The subagent must not receive your summary of the work. Fresh eyes are the point: it reads what the issue says, not what you meant. Do not pre-judge its findings either: never tell the reviewer what to downrate or skip ("don't flag the X we discussed", "treat Y as minor"). A finding you expect to be a false positive still surfaces, and you adjudicate it in the fix loop — pre-judging defeats the fresh eyes. The diff base is always the step-1 issue base: never `HEAD~1` (drops all but the last mid-issue commit) and never the branch merge-base (drags prior issues' work into this issue's review).
 
-**Stage B, code quality.** Run `/code-review` on the working diff.
+**Stage B, code quality.** Run `/code-review` on the working diff — from the same issue base if commits happened mid-issue, so the whole issue is reviewed, not just the uncommitted remainder.
 
 **Fix loop.** Fix Critical/Important findings from both stages. A fix that changes behavior re-runs step 3. Cosmetic findings may be skipped with a one-line reason in the final report.
 

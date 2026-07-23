@@ -3,7 +3,7 @@ name: to-prd
 description: Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context, or when a grill/planning session has resolved all open decisions and is ready to become a PRD.
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT re-interview the user — the grill already resolved the decisions; synthesize what you know. The only questions this skill may ask are step 2's module checks and the boardroom offer below when its gate applies.
 
 **Issue tracker = local markdown files in the issues directory named in CLAUDE.md's Project Profile** (e.g. `issues/`). PRDs are named `prd-<slug>.md`. Completed files get deleted from the working tree, so check git history for prior art: `git log --diff-filter=A --name-only -- <issues-dir>`.
 
