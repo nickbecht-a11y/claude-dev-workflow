@@ -1,13 +1,13 @@
 # Claude Dev Workflow
 
-A portable, seven-stage development workflow for Claude Code: 24 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
+A portable, seven-stage development workflow for Claude Code: 23 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
 
 ## The pipeline
 
 | Stage | Skills | What happens |
 |---|---|---|
 | 1. Shape | `grill-me`, `grill-with-docs` | One-question-at-a-time interview until no fuzzy decisions remain |
-| 2. Explore (optional) | `frontend-design`, `prototype`, `visual-spec`, `boardroom` | Establish the visual direction for new UI; throwaway experiments; five-seat adversarial review for risky plans |
+| 2. Explore (optional) | `frontend-design`, `prototype`, `visual-spec` | Establish the visual direction for new UI; throwaway experiments |
 | 3. PRD | `to-prd` | Synthesize the session into one requirements doc; no re-interviewing |
 | 4. Slice | `to-issues` | Vertical-slice (tracer bullet) issues in a local markdown tracker |
 | 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; both review stages diff from the recorded issue base; UI slices without an approved visual spec route through `visual-spec` first; loop-safe for unattended backlog runs |
@@ -29,7 +29,7 @@ Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, 
    cp -r agents/* <project>/.claude/agents/
    ```
 
-   The `agents/` definitions back the fresh-context, model-pinned subagents that a few skills dispatch (`spec-reviewer` for `/implement` spec review, `boardroom-seat` for `/boardroom`, `ui-prototyper` for the `/prototype` UI branch). Skip this copy and those skills fall back to an unpinned in-session review.
+   The `agents/` definitions back the fresh-context, model-pinned subagents that a few skills dispatch (`spec-reviewer` for `/implement` spec review, `ui-prototyper` for the `/prototype` UI branch). Skip this copy and those skills fall back to an unpinned in-session review.
 
 2. Copy `CLAUDE.md.template` to `<project>/.claude/CLAUDE.md` (or merge its sections into an existing CLAUDE.md) and fill in the **Project Profile** table. The skills reference those slots by name (dev server URL, test commands, issues directory, roles, repo layout) instead of hardcoding any one project's values.
 
@@ -91,7 +91,7 @@ Most skills are stack-agnostic. The exceptions:
 - **Evidence before claims.** No "done", "fixed", or "passing" without having run the proving command this turn and read its output. A subagent's success report is a claim to verify against the diff, not proof.
 - **Fresh eyes can't be fooled.** Spec review runs in a subagent with zero session history reading the diff from the issue's recorded base commit; it reads what the issue says, not what the implementer meant, and never gets told what not to flag.
 - **Proof means a screenshot.** A feature is done when a real browser, driven as the right role, shows it working.
-- **Delete on completion.** Finished issues, plans, and boardroom briefs leave the working tree; git history is the archive. The live tree only describes the present.
+- **Delete on completion.** Finished issues and plans leave the working tree; git history is the archive. The live tree only describes the present.
 - **Lanes scale ceremony, never honesty.** Work enters the spine at the stage its class calls for; the universal gates (evidence, permissions, branch guard) bind in every lane.
 - **The system grows itself, slowly.** `sharpen` fixes workflow friction with the cheapest change that prevents recurrence; new skills need the same friction logged three times.
 
