@@ -16,6 +16,8 @@ Break a plan into independently-grabbable issues using vertical slices (tracer b
 
 Work from whatever is already in the conversation context. If the user passes an issue reference (issue number, URL, or path) as an argument, fetch it from the issue tracker and read its full body and comments.
 
+If the user passes a plan path (e.g. `plans/<slug>.md`, or a plan produced by `/improve`), read it as the source material: the plan plays the PRD's role. Do not re-interview the user or re-derive its decisions — slice it.
+
 ### 2. Explore the codebase (optional)
 
 If you have not already explored the codebase, do so to understand the current state of the code. Issue titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.

@@ -49,7 +49,22 @@ Red flags you're about to violate this: "should work now", "looks right", satisf
 
 Where the workflow assigns proof to the user (e.g. the pure-style eyeball), say "applied, awaiting your eyes" — that is not a done claim.
 
-## Workflow
+## Lanes
+
+Not every task is feature work; route before starting. Pick the lane by observable predicate, never by how small the work feels. When the lane is anything but Feature, state the lane and its predicate in one line before starting. If the predicate flips mid-work (schema gets touched, new behavior appears), stop and upgrade lanes — never finish in the wrong lane.
+
+| Lane | Predicate | Route |
+|---|---|---|
+| Feature | Adds user-visible behavior, touches schema, or opens a new module — however small it feels | Workflow below, from step 1 |
+| Quick fix | Behavior-preserving or cosmetic; no schema; confined to one area | Fix → `/verify-feature` if behavior was touched (pure style: user eyeball) → `/code-review` if non-trivial → commit on a feature branch. No issue file, no spec review — there is no spec to check |
+| Advisory | No working-tree change intended: audit, ideas, roadmap | `/improve` or `/improve-codebase-architecture`; output is plans, no gates |
+| Promote | User picks an advisory plan or finding to build | Enter the workflow at `/to-issues` with the plan path — the plan already is the PRD; don't re-grill it |
+| Polish | Visual pass on existing UI | `/visual-spec` or `/mobile-view` loops; user-eyeball rule applies |
+| Debug | Something is broken | Investigate first; the fix then re-routes by predicate (usually Quick fix) |
+
+No lane relaxes: Verification, Permissions, the default-branch guard, or `/track`.
+
+## Workflow (Feature lane)
 
 1. `/grill-me` (new idea) or `/grill-with-docs` (touches existing domain concepts); a handoff doc or brief feeds the grill, answering most questions upfront
 2. `/frontend-design` first for any new UI (establish the visual language before design work; record what it establishes in `/visual-spec`'s auto-resolved table so later sections inherit it); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS); `/boardroom` (optional, offered by `/to-prd` for sensitive plans): five-seat adversarial review, user rules on every concern

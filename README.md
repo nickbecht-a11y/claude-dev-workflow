@@ -14,6 +14,8 @@ A portable, seven-stage development workflow for Claude Code: 24 skills plus a C
 | 6. Prove | `verify-feature` | Real browser, real role, screenshot as proof. No screenshot, not done |
 | 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | Fresh-eyes spec review + code review, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
 
+Not every task runs the whole pipeline. CLAUDE.md routes work by **lane**, picked on observable predicates rather than size feelings: feature work enters at stage 1; advisory passes (`improve`, `improve-codebase-architecture`) are read-only and gateless, and their plans enter at stage 4 — `to-issues` slices the plan directly, no re-grilling; behavior-preserving quick fixes skip the tracker entirely (fix → verify → review → commit); visual polish and debugging have their own on-ramps. Lanes scale ceremony, never honesty — verification, permissions, and the branch guard bind in every lane, and work that touches schema or adds behavior takes the feature lane however small it feels.
+
 Always on: `caveman` (compressed responses, ~75% fewer output tokens) and `track` (compaction-proof checklist, auto-fires on 5+ step plans, gates "done").
 
 Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, `handoff` (session continuity), `improve`, `improve-codebase-architecture` (codebase health), `better-sqlite3-rebuild` (toolbox). Skill authoring uses the prerequisite `skill-creator` (below).
@@ -90,6 +92,7 @@ Most skills are stack-agnostic. The exceptions:
 - **Fresh eyes can't be fooled.** Spec review runs in a subagent with zero session history reading the diff from the issue's recorded base commit; it reads what the issue says, not what the implementer meant, and never gets told what not to flag.
 - **Proof means a screenshot.** A feature is done when a real browser, driven as the right role, shows it working.
 - **Delete on completion.** Finished issues, plans, and boardroom briefs leave the working tree; git history is the archive. The live tree only describes the present.
+- **Lanes scale ceremony, never honesty.** Work enters the spine at the stage its class calls for; the universal gates (evidence, permissions, branch guard) bind in every lane.
 - **The system grows itself, slowly.** `sharpen` fixes workflow friction with the cheapest change that prevents recurrence; new skills need the same friction logged three times.
 
 ## Credits
