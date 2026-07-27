@@ -34,27 +34,27 @@ Takes one issue from `<issues-dir>/<NN>-<slug>.md` (issues directory per CLAUDE.
 
 ## 3. Prove
 
-- Behavior change: `/verify-feature`. Seed, drive as the right role on the dev server, screenshot path is the proof.
+- Behavior change: `/verify-feature`. Seed, drive as the right role on the dev server, and confirm what the app actually renders. Driving it is the proof; the capture is how you look.
 - Pure style change: skip browser verification, flag for user eyeball (standing rule).
 
-## 4. Review, two stages, fresh eyes
+## 4. Review with fresh eyes
 
-**Stage A, spec compliance.** Dispatch the `spec-reviewer` subagent (defined in `.claude/agents/spec-reviewer.md`, pinned to a high-effort model with fresh context). Its entire input is the issue file path, the PRD path if any, the issue base SHA from step 1, and instructions to run the diff and `git status --porcelain` itself (from the app repo in a nested layout). Prompt shape:
+**Spec compliance — the cold read.** Dispatch the `spec-reviewer` subagent (defined in `.claude/agents/spec-reviewer.md`, pinned with fresh context). Its entire input is the issue file path, the PRD path if any, the issue base SHA from step 1, and instructions to run the diff and `git status --porcelain` itself (from the app repo in a nested layout). Prompt shape:
 
 > Spec-compliance review only, not code quality. Read `<issue path>` (and `<prd path>`). Inspect the diff from `<issue base SHA>` (`git diff <sha>`) and any untracked files. For each requirement and acceptance criterion in the issue, report DELIVERED, PARTIAL, or MISSING with file:line evidence. Also flag anything implemented that the issue never asked for.
 
-The subagent must not receive your summary of the work. Fresh eyes are the point: it reads what the issue says, not what you meant. Do not pre-judge its findings either: never tell the reviewer what to downrate or skip ("don't flag the X we discussed", "treat Y as minor"). A finding you expect to be a false positive still surfaces, and you adjudicate it in the fix loop — pre-judging defeats the fresh eyes. The diff base is always the step-1 issue base: never `HEAD~1` (drops all but the last mid-issue commit) and never the branch merge-base (drags prior issues' work into this issue's review).
+The subagent must not receive your summary of the work. This is not a re-check of what you just did — it is the one read nobody has done yet. You remember the issue as whatever you built from it; a reader handed no story cannot make that mistake. That asymmetry is the whole value, so protect it. Do not pre-judge its findings either: never tell the reviewer what to downrate or skip ("don't flag the X we discussed", "treat Y as minor"). A finding you expect to be a false positive still surfaces, and you adjudicate it in the fix loop — pre-judging defeats the fresh eyes. The diff base is always the step-1 issue base: never `HEAD~1` (drops all but the last mid-issue commit) and never the branch merge-base (drags prior issues' work into this issue's review).
 
-**Stage B, code quality.** Run `/code-review` on the working diff — from the same issue base if commits happened mid-issue, so the whole issue is reviewed, not just the uncommitted remainder.
+**Code quality — quick pass.** Run `/code-review` on the working diff — from the same issue base if commits happened mid-issue, so the whole issue is reviewed, not just the uncommitted remainder. Keep this one quick and deliberately shallow. The thorough quality pass runs once per branch in `/finish-branch`, against the full branch diff, where it can see how the issues interact — which a one-issue-at-a-time read structurally cannot.
 
-**Fix loop.** Fix Critical/Important findings from both stages. A fix that changes behavior re-runs step 3. Cosmetic findings may be skipped with a one-line reason in the final report.
+**Fix loop.** Fix Critical/Important findings. If a fix changes behavior, the step-3 proof no longer describes reality — drive it again. Cosmetic findings may be skipped with a one-line reason in the final report.
 
 ## 5. Close
 
 - Full test suite green (test command per CLAUDE.md's Project Profile).
 - Delete the completed issue file (tracker rule: git history is the archive).
 - Commit to the current feature branch; reference the issue number in the message.
-- Report: what shipped in plain English, proof screenshot path, findings fixed and skipped.
+- Report: what shipped in plain English, what was exercised in the browser and what it showed, findings fixed and skipped.
 
 Never declare done with an unchecked track box, a failing test, or an unfixed Critical finding.
 
@@ -63,6 +63,6 @@ Never declare done with an unchecked track box, a failing test, or an unfixed Cr
 Looping this skill turns it into a backlog worker: each iteration takes the next unblocked issue through every gate above, unattended. Rules that only apply under the loop:
 
 - **Skip, don't stall.** An issue that turns out blocked, ambiguous, or needing a user decision gets skipped with a one-line note; take the next unblocked issue.
-- **Terminate cleanly.** No workable issues left (folder empty, or everything remaining is skipped/blocked): end the loop (stop the wakeups), then report the batch: issues shipped with proof paths, issues skipped with reasons.
+- **Terminate cleanly.** No workable issues left (folder empty, or everything remaining is skipped/blocked): end the loop (stop the wakeups), then report the batch: issues shipped and what proved each one, issues skipped with reasons.
 - **Gates never relax.** Unattended means the same verify and review, not less. If a gate can't be satisfied without the user, that's a skip, not a shortcut.
 - Still no merging or pushing; the batch ends where `/finish-branch` begins.

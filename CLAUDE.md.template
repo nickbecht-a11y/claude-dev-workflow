@@ -45,9 +45,19 @@ Always confirm before: `rm`, `del`, `rmdir`, `Remove-Item`, `git rm`, `git reset
 
 Evidence before claims. No "done", "fixed", "passing", or "works" — including paraphrases or anything implying success — without having run the proving command this turn and read its output. A subagent's success report is a claim to verify against the VCS diff, not proof.
 
+This is a rule about what you may *claim*, not an instruction to re-check your work. Correcting yourself while writing is not the same as having run the thing; nothing substitutes for the command and its output.
+
 Red flags you're about to violate this: "should work now", "looks right", satisfaction before evidence ("Great!", "Perfect!"), or committing/pushing without a fresh run.
 
 Where the workflow assigns proof to the user (e.g. the pure-style eyeball), say "applied, awaiting your eyes" — that is not a done claim.
+
+## Scope, Delegation, Length
+
+**Scope.** Deliver what was asked, at the scope intended. Make routine judgment calls yourself; check in only when different readings of the request lead to materially different work. If the request looks mistaken or a better approach exists, say so in a sentence and build what was asked — never quietly narrow, widen, or transform it. Finish the whole task, and stop short of anything clearly beyond it.
+
+**Delegation.** Subagents are for large, genuinely independent work: a wide multi-file investigation, or a read nobody has done yet (the cold spec review). Never spawn one to double-check work you just did — a second look at the same code with the same knowledge buys nothing. One agent beats several; keep spawn counts low.
+
+**Length.** Match written documents — PRDs, plans, issue files, handoffs, reports — to what the task needs. Cover the substance, then stop. No filler sections, restated summaries, or boilerplate. Long is not thorough.
 
 ## Lanes
 
@@ -69,7 +79,7 @@ No lane relaxes: Verification, Permissions, the default-branch guard, or `/track
 1. `/grill-me` (new idea) or `/grill-with-docs` (touches existing domain concepts); a handoff doc or brief feeds the grill, answering most questions upfront
 2. `/frontend-design` first for any new UI (establish the visual language before design work; record what it establishes in `/visual-spec`'s auto-resolved table so later sections inherit it); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS)
 3. `/to-prd` then `/to-issues`
-4. `/implement` per issue. Chains the gates in order: build (`/tdd` for complex logic, `/new-migration` for schema) → `/verify-feature` (behavior changes; pure style skips the browser, user eyeballs) → two-stage review (fresh-context spec-compliance subagent, then `/code-review`) → delete issue file → commit on the feature branch
+4. `/implement` per issue. Chains the gates in order: build (`/tdd` for complex logic, `/new-migration` for schema) → `/verify-feature` (behavior changes; pure style skips the browser, user eyeballs) → review (fresh-context spec-compliance subagent, then a quick `/code-review`; the deep quality pass runs once per branch in `/finish-branch`) → delete issue file → commit on the feature branch
 5. `/finish-branch` when the branch is done: CI trio green, docs sweep, merge in the layout's required order, cleanup, then `/sharpen` (workflow friction review; cheapest-fix-first, new skills only on repeat evidence); after any push, `/watch-ci` offers to babysit Actions until green
 
 `/track` auto-triggers on any plan with 5+ steps: checklist in `.claude/tasks/active.md`, survives context compression, no "done" until every box checked, archive on completion. `/qa-sweep` for full-app QA runs.

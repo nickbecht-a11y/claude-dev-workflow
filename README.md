@@ -2,6 +2,8 @@
 
 A portable, seven-stage development workflow for Claude Code: 23 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
 
+Tuned for Claude Opus 5, which verifies and corrects its own work as it goes. The workflow therefore never instructs a re-check — it defines what finished looks like and reviews only where fresh information exists. See [Design principles](#design-principles-why-it-works).
+
 ## The pipeline
 
 | Stage | Skills | What happens |
@@ -10,9 +12,9 @@ A portable, seven-stage development workflow for Claude Code: 23 skills plus a C
 | 2. Explore (optional) | `frontend-design`, `prototype`, `visual-spec` | Establish the visual direction for new UI; throwaway experiments |
 | 3. PRD | `to-prd` | Synthesize the session into one requirements doc; no re-interviewing |
 | 4. Slice | `to-issues` | Vertical-slice (tracer bullet) issues in a local markdown tracker |
-| 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; both review stages diff from the recorded issue base; UI slices without an approved visual spec route through `visual-spec` first; loop-safe for unattended backlog runs |
-| 6. Prove | `verify-feature` | Real browser, real role, screenshot as proof. No screenshot, not done |
-| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | Fresh-eyes spec review + code review, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
+| 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; review diffs from the recorded issue base; UI slices without an approved visual spec route through `visual-spec` first; loop-safe for unattended backlog runs |
+| 6. Prove | `verify-feature` | Real browser, real role, driven end-to-end. Not done until it's been run |
+| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | The deep code review of the whole branch, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
 
 Not every task runs the whole pipeline. CLAUDE.md routes work by **lane**, picked on observable predicates rather than size feelings: feature work enters at stage 1; advisory passes (`improve`, `improve-codebase-architecture`) are read-only and gateless, and their plans enter at stage 4 — `to-issues` slices the plan directly, no re-grilling; behavior-preserving quick fixes skip the tracker entirely (fix → verify → review → commit); visual polish and debugging have their own on-ramps. Lanes scale ceremony, never honesty — verification, permissions, and the branch guard bind in every lane, and work that touches schema or adds behavior takes the feature lane however small it feels.
 
@@ -90,7 +92,8 @@ Most skills are stack-agnostic. The exceptions:
 - **Gates are a mechanism, not a memory.** `implement` chains build → prove → review in code, so verification can't be skipped by forgetting.
 - **Evidence before claims.** No "done", "fixed", or "passing" without having run the proving command this turn and read its output. A subagent's success report is a claim to verify against the diff, not proof.
 - **Fresh eyes can't be fooled.** Spec review runs in a subagent with zero session history reading the diff from the issue's recorded base commit; it reads what the issue says, not what the implementer meant, and never gets told what not to flag.
-- **Proof means a screenshot.** A feature is done when a real browser, driven as the right role, shows it working.
+- **Proof means running it.** A feature is done when a real browser, driven as the right role against real data, shows it working — that catches the dead route, the missing env var, the permission rule denying the role, and the empty screen, none of which a test run or a code read will mention. The screenshot is how the agent looks; it isn't the deliverable.
+- **Check once, at the right altitude.** Current models self-correct as they write, so the workflow doesn't ask them to re-read their own work. It states what finished looks like, then spends its review budget where a second pair of eyes actually sees something new: a cold read against the spec per issue, and one deep quality pass per branch.
 - **Delete on completion.** Finished issues and plans leave the working tree; git history is the archive. The live tree only describes the present.
 - **Lanes scale ceremony, never honesty.** Work enters the spine at the stage its class calls for; the universal gates (evidence, permissions, branch guard) bind in every lane.
 - **The system grows itself, slowly.** `sharpen` fixes workflow friction with the cheapest change that prevents recurrence; new skills need the same friction logged three times.

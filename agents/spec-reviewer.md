@@ -1,8 +1,8 @@
 ---
 name: spec-reviewer
-description: Fresh-context spec-compliance reviewer for /implement Stage A. Reads an issue (and PRD) cold, inspects the diff, and reports each requirement as DELIVERED, PARTIAL, or MISSING. Dispatched by the implement skill; not for general code review.
-model: claude-opus-4-8
-effort: high
+description: Fresh-context spec-compliance reviewer for /implement's cold read. Reads an issue (and PRD) cold, inspects the diff, and reports each requirement as DELIVERED, PARTIAL, or MISSING. Dispatched by the implement skill; not for general code review.
+model: claude-opus-5
+effort: medium
 tools:
   - Read
   - Grep

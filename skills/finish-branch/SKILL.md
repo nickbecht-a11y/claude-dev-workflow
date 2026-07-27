@@ -19,6 +19,7 @@ Run the project's build, test, and lint commands (per CLAUDE.md's Project Profil
 
 ## 2. Pre-merge sweep
 
+- **Thorough quality review of the whole branch.** Run `/code-review` against the full branch diff from its merge-base (`git diff $(git merge-base <default> HEAD) HEAD`). `/implement` runs only a quick pass per issue; this is the deep one, and it is the only review that sees how the issues interact rather than each in isolation. Fix Critical/Important findings before merging — a fix that touches behavior sends you back through step 1.
 - Completed issue files deleted from the issues directory? (`/implement` does this per issue; catch stragglers.)
 - Structurally significant change on this branch (new role, major UI section, table, storage bucket, service, integration)? Assess against the branch's full diff from its merge-base with the default branch (`git diff $(git merge-base <default> HEAD) HEAD`), never `HEAD~1` — a multi-commit branch is more than its last commit. Update the project's architecture docs/diagrams, if it keeps any.
 - `.claude/tasks/active.md` complete? Archive to `.claude/tasks/archive/`.
@@ -33,7 +34,7 @@ Run the project's build, test, and lint commands (per CLAUDE.md's Project Profil
 
 ## 4. Execute (options 1 and 2)
 
-- Merge the feature branch into the default branch, then re-run the test suite on the merged result. Red merged result: stop and report.
+- Merge the feature branch into the default branch. If the merge fast-forwarded, the tree is identical to the one step 1 already proved green — don't re-run. If it was a real merge (the default branch had moved on), the merged tree is code that has never existed anywhere before: run the test suite on it. Red merged result: stop and report.
 - Nested layout only: after the inner repo is merged and green, stage the pointer plus any docs/plans/skills changes in the outer repo, commit `chore: bump <inner> pointer (<one-line summary>)`, then merge the outer feature branch.
 
 Push only for option 1. Pushing always goes through user confirmation (permission rule, never bypass).

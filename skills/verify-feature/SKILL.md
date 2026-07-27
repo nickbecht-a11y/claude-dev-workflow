@@ -2,15 +2,17 @@
 name: verify-feature
 description: >
   Prove a feature works end-to-end: seed data if needed, drive the live app
-  with Playwright as the right role, screenshot the result, return the file
-  path as proof. Use after implementing any feature or fix, before declaring
-  it done. Triggers: "verify", "prove it works", "show me it working", or
-  completion of any user-visible change.
+  with Playwright as the right role, look at what it actually renders, and
+  report what was exercised. Use after implementing any feature or fix,
+  before declaring it done. Triggers: "verify", "prove it works", "show me
+  it working", or completion of any user-visible change.
 ---
 
 # Verify Feature
 
-No feature is done until there is a screenshot proving it. Verbal "it should work now" does not count.
+No feature is done until it has been driven in a real browser, as the role that actually uses it. Verbal "it should work now" does not count.
+
+Driving the live app is the gate; the image file is not. What the drive catches is the class of failure nothing else will tell you about: a route that never mounted, a missing environment variable, a permission rule quietly denying the role, a screen that renders perfectly with nothing in it. No test run and no code read surfaces those. The capture is how *you* see the app — working material, not a report for the user.
 
 ## When NOT to run this
 
@@ -45,18 +47,20 @@ If the dev server reports the port in use, use the actual port it prints (Vite, 
 
 Navigate to the feature. On a mobile viewport, navigation may hide behind a hamburger — see the `mobile-view` skill for the open-menu → click-link pattern.
 
-### 4. Screenshot
+### 4. Look at it
 
 ```js
-mcp__playwright__browser_take_screenshot({ type: "png", filename: "screenshots/verify-<feature-slug>.png" })
+mcp__playwright__browser_take_screenshot({ type: "png", filename: "<scratchpad>/verify-<feature-slug>.png" })
 ```
 
-Screenshots go to the project's screenshots directory (default `screenshots/` at repo root) — never a temp folder or the scratchpad. Read the file back with the Read tool and confirm the feature actually shows what it should. A screenshot of the wrong state is not proof.
+**Read the file back with the Read tool and confirm the app is in the state it should be in.** This is the step that does the work. A capture nobody looked at proves nothing, and a capture of the wrong screen is worse than none.
+
+Routine verification captures go to the scratchpad — they are working material. Write to the project's screenshots directory (default `screenshots/` at repo root) only when a person has a reason to open the file: the feature is broken, or you are running `/qa-sweep` or `/mobile-view`, whose output is meant to be read.
 
 ### 5. Report
 
-Return the screenshot file path in the final message. If the feature spans roles (e.g. one role submits, another approves), repeat steps 1-4 per role and return all paths.
+Say what you exercised and what you saw, in plain English: the role you signed in as, the path you drove through the app, and the state it was actually in. A file path appears only when there is a reason to open it (see step 4). If the feature spans roles (e.g. one role submits, another approves), drive each role and report each path through the app.
 
 ## Failure handling
 
-If the screenshot shows the feature broken or missing: that is a finding, not a verification. Say so plainly, keep the screenshot as evidence, fix, re-verify.
+If the app shows the feature broken or missing: that is a finding, not a verification. Say so plainly and save the capture to the project's screenshots directory so it can be looked at. Once it is fixed, behavior has changed — so what you saw no longer describes the app, and the drive has to happen again.
