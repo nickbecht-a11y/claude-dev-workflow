@@ -32,6 +32,8 @@ skills run in and which gates are mandatory.
 
 Screenshots go in `screenshots/`, plans/PRDs/specs in `plans/`, handoff docs in `handoffs/`, QA reports in `qa-report/` (all at repo root).
 
+Throwaway working files never enter the repo — routine verification captures, scratch scripts, intermediate output. Those go in the session scratchpad. A file earns a repo folder only when a person has a reason to open it later.
+
 ## Communication Style
 
 <!-- Optional. Delete this section to keep normal verbosity. -->
@@ -80,6 +82,6 @@ No lane relaxes: Verification, Permissions, the default-branch guard, or `/track
 2. `/frontend-design` first for any new UI (establish the visual language before design work; record what it establishes in `/visual-spec`'s auto-resolved table so later sections inherit it); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS)
 3. `/to-prd` then `/to-issues`
 4. `/implement` per issue. Chains the gates in order: build (`/tdd` for complex logic, `/new-migration` for schema) → `/verify-feature` (behavior changes; pure style skips the browser, user eyeballs) → review (fresh-context spec-compliance subagent, then a quick `/code-review`; the deep quality pass runs once per branch in `/finish-branch`) → delete issue file → commit on the feature branch
-5. `/finish-branch` when the branch is done: CI trio green, docs sweep, merge in the layout's required order, cleanup, then `/sharpen` (workflow friction review; cheapest-fix-first, new skills only on repeat evidence); after any push, `/watch-ci` offers to babysit Actions until green
+5. `/finish-branch` when the branch is done: CI trio green, the deep `/code-review` of the whole branch, docs sweep, merge in the layout's required order, cleanup, then `/sharpen` (workflow friction review; cheapest-fix-first, new skills only on repeat evidence); after any push, `/watch-ci` offers to babysit Actions until green
 
 `/track` auto-triggers on any plan with 5+ steps: checklist in `.claude/tasks/active.md`, survives context compression, no "done" until every box checked, archive on completion. `/qa-sweep` for full-app QA runs.

@@ -1,6 +1,11 @@
 ---
 name: ui-prototyper
 description: Fresh-context divergent UI-variation generator for the /prototype UI branch. Reads a one-page design brief cold, explores the codebase read-only for design tokens and component conventions, and returns N structurally-different variant directions with first-pass implementations. Dispatched by the prototype skill's UI branch; not for logic prototypes or production UI.
+# Fable is deliberate here, not an oversight. Opus is the workflow's builder
+# everywhere else; this is the one job where Fable's willingness to reject the
+# premise it was handed is the product. Nothing here ships — it is throwaway
+# exploration — so the unpredictability that disqualifies Fable for production
+# code is exactly what earns it this slot. Do not normalise this pin to Opus.
 model: claude-fable-5
 effort: medium
 tools:
@@ -8,14 +13,6 @@ tools:
   - Grep
   - Glob
 ---
-
-<!--
-Pinned to Fable deliberately, not by oversight. Opus is the workflow's builder
-everywhere else; this is the one job where Fable's willingness to reject the
-premise it was handed is the product. Nothing here ships — it is throwaway
-exploration — so the unpredictability that disqualifies Fable for production
-code is exactly what earns it this slot. Do not normalise this pin to Opus.
--->
 
 You generate radically different UI directions for a throwaway prototype. Your only input is a one-page design brief that arrives in your dispatch prompt. You have no memory of the conversation that produced it, and that is the point: you push the brief to places that conversation would not, testing where the design could actually land instead of transcribing the answer it already assumed.
 
