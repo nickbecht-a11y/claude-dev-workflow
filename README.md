@@ -1,6 +1,6 @@
 # Claude Dev Workflow
 
-A portable, seven-stage development workflow for Claude Code: 23 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
+A portable, seven-stage development workflow for Claude Code: 24 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
 
 Tuned for Claude Opus 5, which verifies and corrects its own work as it goes. The workflow therefore never instructs a re-check — it defines what finished looks like and reviews only where fresh information exists. See [Design principles](#design-principles-why-it-works).
 
@@ -20,7 +20,7 @@ Not every task runs the whole pipeline. CLAUDE.md routes work by **lane**, picke
 
 Always on: `caveman` (compressed responses, ~75% fewer output tokens) and `track` (compaction-proof checklist, auto-fires on 5+ step plans, gates "done").
 
-Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, `handoff` (session continuity), `improve`, `improve-codebase-architecture` (codebase health), `better-sqlite3-rebuild` (toolbox). Skill authoring uses the prerequisite `skill-creator` (below).
+Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, `handoff` (session continuity), `improve`, `improve-codebase-architecture` (codebase health), `better-sqlite3-rebuild`, `youtube-transcript` (toolbox). Skill authoring uses the prerequisite `skill-creator` (below).
 
 ## Install into a project
 
