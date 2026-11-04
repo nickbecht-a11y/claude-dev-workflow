@@ -17,7 +17,8 @@ Migrations live in the migrations directory named in CLAUDE.md's Project Profile
 1. **Next number** — highest existing file number + 1: check `<migrations-dir>/*.sql`.
 2. **Write the file** — `<migrations-dir>/<NN>-<slug>.sql`.
 3. **Apply** — `mcp__supabase__apply_migration` with the file contents.
-4. **Verify** — `mcp__supabase__list_migrations` or a probe query via `mcp__supabase__execute_sql`.
+4. **Advisors** — run `get_advisors` (security, then performance) and fix anything the migration introduced, in a follow-up numbered file. If the project has Supabase's own skills installed (`npx skills add supabase/agent-skills`), load `supabase-postgres-best-practices` before writing the file; this skill still owns the process where they disagree.
+5. **Verify** — `mcp__supabase__list_migrations` or a probe query via `mcp__supabase__execute_sql`.
 
 ## Hard rules
 

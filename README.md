@@ -1,6 +1,6 @@
 # Claude Dev Workflow
 
-A portable, seven-stage development workflow for Claude Code: 24 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
+A portable, seven-stage development workflow for Claude Code: 29 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
 
 Tuned for Claude Opus 5, which verifies and corrects its own work as it goes. The workflow therefore never instructs a re-check — it defines what finished looks like and reviews only where fresh information exists. See [Design principles](#design-principles-why-it-works).
 
@@ -9,18 +9,18 @@ Tuned for Claude Opus 5, which verifies and corrects its own work as it goes. Th
 | Stage | Skills | What happens |
 |---|---|---|
 | 1. Shape | `grill-me`, `grill-with-docs` | One-question-at-a-time interview until no fuzzy decisions remain |
-| 2. Explore (optional) | `frontend-design`, `prototype`, `visual-spec` | Establish the visual direction for new UI; throwaway experiments |
+| 2. Explore (optional) | `frontend-design`, `scroll-craft`, `prototype`, `visual-spec` | Establish the visual direction for new UI (`scroll-craft` for a landing page or marketing site); throwaway experiments |
 | 3. PRD | `to-prd` | Synthesize the session into one requirements doc; no re-interviewing |
 | 4. Slice | `to-issues` | Vertical-slice (tracer bullet) issues in a local markdown tracker |
 | 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; review diffs from the recorded issue base; UI slices without an approved visual spec route through `visual-spec` first; loop-safe for unattended backlog runs |
 | 6. Prove | `verify-feature` | Real browser, real role, driven end-to-end. Not done until it's been run |
-| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | The deep code review of the whole branch, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
+| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | The deep code review and a `/security-review` of the whole branch, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
 
 Not every task runs the whole pipeline. CLAUDE.md routes work by **lane**, picked on observable predicates rather than size feelings: feature work enters at stage 1; advisory passes (`improve`, `improve-codebase-architecture`) are read-only and gateless, and their plans enter at stage 4 — `to-issues` slices the plan directly, no re-grilling; behavior-preserving quick fixes skip the tracker entirely (fix → verify → review → commit); visual polish and debugging have their own on-ramps. Lanes scale ceremony, never honesty — verification, permissions, and the branch guard bind in every lane, and work that touches schema or adds behavior takes the feature lane however small it feels.
 
 Always on: `caveman` (compressed responses, ~75% fewer output tokens) and `track` (compaction-proof checklist, auto-fires on 5+ step plans, gates "done").
 
-Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, `handoff` (session continuity), `improve`, `improve-codebase-architecture` (codebase health), `better-sqlite3-rebuild`, `youtube-transcript` (toolbox). Skill authoring uses the prerequisite `skill-creator` (below).
+Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, `handoff` (session continuity), `improve`, `improve-codebase-architecture` (codebase health), `better-sqlite3-rebuild`, `youtube-transcript`, `playwright-cli` (toolbox). Launch and operations: `shipping-and-launch` (called by `finish-branch` for a go-live), `performance-optimization` (measure first, then fix), `observability-and-instrumentation` (logging, metrics and alerts written with the feature). Skill authoring uses the prerequisite `skill-creator` (below).
 
 ## Install into a project
 
@@ -61,6 +61,16 @@ claude mcp add lsmcp npx -- -y @mizchi/lsmcp -p tsgo
 
 Non-TS stack: swap the `tsgo` preset for a language server via `@mizchi/lsmcp --bin=<lsp-command>`, or skip it.
 
+### Browser automation: playwright-cli, not Playwright MCP
+
+The browser-driving skills use Microsoft's [`playwright-cli`](https://github.com/microsoft/playwright-cli) through Bash rather than the Playwright MCP server. It keeps tool schemas and accessibility trees out of context, gives each Claude session its own named browser (`-s=<task>`) so parallel sessions stop colliding, and writes screenshots anywhere, scratchpad included. Install once per machine:
+
+```sh
+npm install -g @playwright/cli@latest
+```
+
+The vendored `skills/playwright-cli` is the CLI's own command reference (from `playwright-cli install --skills`); refresh it the same way after upgrading. Allow `Bash(playwright-cli *)` in the project's settings so drives do not prompt. If a project still has a `playwright` entry in `.mcp.json`, remove it.
+
 ### Prerequisite skills
 
 Two official Anthropic skills are referenced by the pipeline but not vendored here — they ship and auto-update via [`anthropics/skills`](https://github.com/anthropics/skills). Install them once into `~/.claude/skills/` so they resolve in every project:
@@ -72,17 +82,27 @@ Two official Anthropic skills are referenced by the pipeline but not vendored he
 
 Install: clone `anthropics/skills` and copy the `frontend-design` and `skill-creator` folders into `~/.claude/skills/`.
 
+## Pocketed, not installed
+
+Vetted and parked until a project needs them. Install from the source when it does.
+
+| Tool | Install | Pick it up when |
+|---|---|---|
+| Expo skills (`expo/skills`) | `claude plugin install expo@claude-plugins-official` | A project ships a React Native or Expo mobile app |
+| Stripe best practices (`stripe/ai`) | `claude plugin install stripe@claude-plugins-official` | A project starts building billing on Stripe |
+
 ## Stack assumptions, per skill
 
 Most skills are stack-agnostic. The exceptions:
 
 | Skill | Assumes | If your stack differs |
 |---|---|---|
-| `new-migration` | Supabase (MCP server, RLS, SQL migrations) | Rewrite steps 3-4 for your migration tool; keep the gates (numbered files as source of truth, no hand-edited prod schema) |
-| `verify-feature`, `mobile-view`, `qa-sweep` | Web app + MCP Playwright server | Any browsable app works; configure a `playwright` MCP server |
+| `new-migration` | Supabase (MCP server, RLS, SQL migrations). Optional companion: Supabase's own skills, `npx skills add supabase/agent-skills` | Rewrite steps 3-4 for your migration tool; keep the gates (numbered files as source of truth, no hand-edited prod schema) |
+| `verify-feature`, `mobile-view`, `qa-sweep` | Web app + `playwright-cli` on PATH | Any browsable app works; install the CLI (below) |
 | `watch-ci`, `finish-branch` | GitHub Actions + `gh` CLI | Swap the `gh run` commands for your CI's CLI |
 | `visual-spec` | A design system you record in its fill-in tables | Fill the tables the first time you use it |
 | `better-sqlite3-rebuild` | Node + better-sqlite3 | Delete if unused |
+| `scroll-craft` | Static HTML landing pages; optional kie.ai key for generated assets (paid) | Delete for app-only projects |
 
 `mobile-view` and `visual-spec` also contain fill-in tables meant to accumulate project-specific rules over time; they start empty here.
 
@@ -100,4 +120,4 @@ Most skills are stack-agnostic. The exceptions:
 
 ## Credits
 
-Several skills started from or were shaped by community skills (`tdd`, `grill-me`, `improve`, `improve-codebase-architecture`, `drawio`, `better-sqlite3-rebuild`, `to-prd`/`to-issues` lineage) and were adapted; the rest were purpose-built for this workflow.
+Several skills started from or were shaped by community skills (`tdd`, `grill-me`, `improve`, `improve-codebase-architecture`, `drawio`, `better-sqlite3-rebuild`, `to-prd`/`to-issues` lineage) and were adapted; `scroll-craft` (nateherkai/scroll-craft), `playwright-cli` (microsoft/playwright-cli) and the three launch and operations skills (addyosmani/agent-skills) are vendored with local rules on top; the rest were purpose-built for this workflow.

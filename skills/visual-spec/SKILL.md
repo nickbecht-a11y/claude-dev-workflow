@@ -9,7 +9,7 @@ Lock every visual decision before writing code. No HTML or CSS until the spec is
 
 ## Which surface? Branch first
 
-If the project has more than one design surface (marketing site, app portals, admin panel), name the design source of truth for each in the table below and branch on it before interviewing. Only ask about decisions that surface's source of truth doesn't already answer.
+If the project has more than one design surface (marketing site, app portals, admin panel), name the design source of truth for each in the table below and branch on it before interviewing. Only ask about decisions that surface's source of truth doesn't already answer. A new landing page or full-site build starts with `/scroll-craft` for the page grammar and visitor journey; this skill then locks each section inside it.
 
 | Surface | Design source of truth |
 |---|---|

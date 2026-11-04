@@ -34,14 +34,18 @@ Empty states prove nothing. If the feature renders data, make sure data exists f
 
 **Default to the local dev server** (command and URL per CLAUDE.md's Project Profile). Any change made in this working tree is only live there. The production URL is the deployed build and does NOT contain uncommitted local changes — only navigate there when the explicit goal is to verify what is already in production.
 
-```js
-mcp__playwright__browser_resize({ width: 1280, height: 800 })  // or 390x844 for mobile checks
-mcp__playwright__browser_navigate({ url: DEV_SERVER_URL })
-// log in as the chosen role — selectors are project-specific; record them in CLAUDE.md if nonstandard
-mcp__playwright__browser_type({ target: 'input[type="email"]', text: EMAIL })
-mcp__playwright__browser_click({ target: 'button:has-text("Sign in")' })
-mcp__playwright__browser_wait_for({ time: 2 })
+Drive it with `playwright-cli` through Bash. Give every command a session named after the task (`-s=<slug>`), so a second Claude session on the same machine gets its own browser instead of fighting over one.
+
+```bash
+playwright-cli -s=verify open DEV_SERVER_URL
+playwright-cli -s=verify resize 1280 800        # or 390 844 for mobile checks
+playwright-cli -s=verify snapshot               # element refs (e5, e12, ...) come from here
+# log in as the chosen role: fill and click by ref, or by selector if CLAUDE.md records a nonstandard one
+playwright-cli -s=verify fill e5 "EMAIL"
+playwright-cli -s=verify fill e7 "PASSWORD" --submit
 ```
+
+Refs only last until the page changes. Take a fresh `snapshot` after every navigation or render before using a ref, and use `find "<text>"` instead of reading a whole snapshot when you are looking for one element. Run `close` on the session when you are done. On Windows Git Bash, an argument that starts with `/` is rewritten into a file path (`/foo/i` becomes `C:/Program Files/Git/foo/i`), so a `find --regex "/.../i"` silently matches nothing: prefix the command with `MSYS_NO_PATHCONV=1`.
 
 If the dev server reports the port in use, use the actual port it prints (Vite, for example, bumps to the next free port).
 
@@ -49,9 +53,12 @@ Navigate to the feature. On a mobile viewport, navigation may hide behind a hamb
 
 ### 4. Look at it
 
-```js
-mcp__playwright__browser_take_screenshot({ type: "png", filename: "<scratchpad>/verify-<feature-slug>.png" })
+```bash
+playwright-cli -s=verify screenshot --filename="<scratchpad>/verify-<feature-slug>.png"
+playwright-cli -s=verify console error          # errors the screen may not show
 ```
+
+For a question about text or structure ("is the row there", "does the badge say Approved"), `snapshot` or `find` answers it more cheaply than an image. Use the screenshot when what matters is how it renders.
 
 **Read the file back with the Read tool and confirm the app is in the state it should be in.** This is the step that does the work. A capture nobody looked at proves nothing, and a capture of the wrong screen is worse than none.
 

@@ -17,7 +17,7 @@ Sweep every feature in scope, report every one, fix what's fixable, flag what is
 1. `/track` the run — a sweep is always 5+ steps.
 2. Report file: `qa-report/QA-REPORT.md` (create or append a dated section). Screenshots: `screenshots/qa-<date>/`.
 3. Enumerate scope BEFORE testing: list every feature/page/sub-tab from the router, CLAUDE.md's code map, and nav menus. The list is the contract — each entry must appear in the report.
-4. Roles per CLAUDE.md's Project Profile; test credentials in a memory file, never the repo. Local dev servers on one port per role avoids session churn.
+4. Roles per CLAUDE.md's Project Profile; test credentials in a memory file, never the repo. Drive with `playwright-cli` (pattern in `/verify-feature`), one named session per role (`-s=qa-<role>`). Each session keeps its own cookies, so every role stays signed in side by side on one dev server instead of logging out and back in.
 
 ## Statuses — every scoped item gets exactly one
 
