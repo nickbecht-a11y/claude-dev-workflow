@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Skill frontmatter, CLAUDE.md section references, relative links,
+      # machine-specific paths, and a drift-check self-test.
+      - run: node tools/check.mjs
+      # drawio's dependencies are committed, so there is no install step.
+      - run: node --test
+        working-directory: skills/drawio/scripts

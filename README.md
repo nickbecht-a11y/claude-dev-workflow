@@ -56,6 +56,8 @@ node tools/drift-check.mjs <project-root>
 
 Compares every file under `skills/` and `agents/` here with the project's `.claude/` copy, ignoring line endings, and prints each one that differs or is missing, then `inspected N = same + differs + missing + not installed`. A skill the project chose not to install is not counted as drift. Since project facts live in the project's CLAUDE.md, any difference is a real change: port it here, or bring the project's copy back in line. `sharpen` runs it at the end of every branch for projects on tracked copies.
 
+CI (`.github/workflows/ci.yml`) runs on every push: `node tools/check.mjs` (skill and agent frontmatter, every CLAUDE.md section a skill names exists in the template, relative links resolve, no machine-specific paths, and a self-test of the drift check), then drawio's test suite. Run `node tools/check.mjs` locally before pushing a skill edit.
+
 ## MCP servers
 
 Skills are *procedures*; these MCP servers are *capabilities* the agent lacks at runtime. Two are worth wiring in — they close gaps the skills can't, and conflict with nothing in the pipeline.
