@@ -37,13 +37,18 @@ Empty states prove nothing. If the feature renders data, make sure data exists f
 Drive it with `playwright-cli` through Bash. Give every command a session named after the task (`-s=<slug>`), so a second Claude session on the same machine gets its own browser instead of fighting over one.
 
 ```bash
+# sign in with the Login command from CLAUDE.md's Project Profile; it saves the session and prints no secret
+<login command> <role> "<scratchpad>/state-<role>.json"
 playwright-cli -s=verify open DEV_SERVER_URL
+playwright-cli -s=verify state-load "<scratchpad>/state-<role>.json"
+playwright-cli -s=verify goto DEV_SERVER_URL/<route>
 playwright-cli -s=verify resize 1280 800        # or 390 844 for mobile checks
 playwright-cli -s=verify snapshot               # element refs (e5, e12, ...) come from here
-# log in as the chosen role: fill and click by ref, or by selector if CLAUDE.md records a nonstandard one
-playwright-cli -s=verify fill e5 "EMAIL"
-playwright-cli -s=verify fill e7 "PASSWORD" --submit
 ```
+
+Never type a password with `playwright-cli fill`: it echoes the value into the transcript. The login command reads the credentials file itself. A state file only works for the origin it was made on, and it holds a live session token, so it stays in the scratchpad.
+
+No login command yet? Write one before driving, and record it in the Project Profile: a short Node script that takes a role and an output path, reads the credentials file in memory, signs in with the Playwright library (answering a 2FA challenge if the account has one), and saves `context.storageState()` to the path. It prints the role and where it landed, never a credential.
 
 Refs only last until the page changes. Take a fresh `snapshot` after every navigation or render before using a ref, and use `find "<text>"` instead of reading a whole snapshot when you are looking for one element. Run `close` on the session when you are done. On Windows Git Bash, an argument that starts with `/` is rewritten into a file path (`/foo/i` becomes `C:/Program Files/Git/foo/i`), so a `find --regex "/.../i"` silently matches nothing: prefix the command with `MSYS_NO_PATHCONV=1`.
 
@@ -62,11 +67,13 @@ For a question about text or structure ("is the row there", "does the badge say 
 
 **Read the file back with the Read tool and confirm the app is in the state it should be in.** This is the step that does the work. A capture nobody looked at proves nothing, and a capture of the wrong screen is worse than none.
 
-Routine verification captures go to the scratchpad — they are working material. Write to the project's screenshots directory (default `screenshots/` at repo root) only when a person has a reason to open the file: the feature is broken, or you are running `/qa-sweep` or `/mobile-view`, whose output is meant to be read.
+Routine verification captures are working material, so they go to the session scratchpad, not the deliverable folder. Write to the project's screenshots directory (default `screenshots/` at repo root) only when a person has a reason to open the file: the feature is broken, or you are running `/qa-sweep` or `/mobile-view`, whose output is meant to be read.
 
 ### 5. Report
 
 Say what you exercised and what you saw, in plain English: the role you signed in as, the path you drove through the app, and the state it was actually in. A file path appears only when there is a reason to open it (see step 4). If the feature spans roles (e.g. one role submits, another approves), drive each role and report each path through the app.
+
+**This goes in the chat report's Done section. It does not become a file.** UI verification earns no file because the next person can re-run the app. Schema and deployed edge function behaviour still earn a file, because neither can be re-derived from the repo. See CLAUDE.md's Verification section for the routing.
 
 ## Failure handling
 

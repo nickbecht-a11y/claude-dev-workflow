@@ -36,6 +36,7 @@ Strict order. Take the first level that fully prevents the friction, never a hig
 1. **Nothing.** One-off, external cause, or already fixed in passing.
 2. **One line.** Add/fix a CLAUDE.md rule or pointer, or a memory file. Apply immediately.
 3. **Edit an existing skill.** Sharpen a trigger phrase, add a missed step, reorder steps to match reality, fix a stale path. This is how existing skills self-improve: the sharpen pass folds what actually happened back into the skill. Apply immediately.
+   A skill that came from the workflow repo (CLAUDE.md's Project Profile, Skills row) is shared, so write the edit to work in any project, putting any project fact in CLAUDE.md instead. If the project keeps tracked copies, run the drift check named there and list each differing file under the report's **Suggestions** as "port to the workflow repo"; otherwise the next project never gets the fix.
 4. **New skill.** Only with repeat evidence (below), and only ever proposed to the user, never auto-created. If approved, `/skill-creator` does the writing, under two rules: **baseline first** — watch an agent hit the friction *without* the skill before writing it, so it targets the real failure, not an imagined one; and **describe when, not what** — the skill's `description` names its triggering conditions, never a summary of its steps (a description that summarizes the workflow makes agents follow the summary and skip the skill body).
 
 ## 3. Breadcrumbs and the rule of three

@@ -15,7 +15,8 @@ Sweep every feature in scope, report every one, fix what's fixable, flag what is
 ## Setup
 
 1. `/track` the run — a sweep is always 5+ steps.
-2. Report file: `qa-report/QA-REPORT.md` (create or append a dated section). Screenshots: `screenshots/qa-<date>/`.
+2. Output: the sweep reports **in chat**, in CLAUDE.md's five-heading format, not to a file. Screenshots go to `screenshots/` (a sweep is exactly the case where a person has a reason to open one). A defect that turns out to be deployed edge function behaviour still earns `qa-report/<NN>-<slug>.md`, per CLAUDE.md's evidence rule; nothing else does.
+
 3. Enumerate scope BEFORE testing: list every feature/page/sub-tab from the router, CLAUDE.md's code map, and nav menus. The list is the contract — each entry must appear in the report.
 4. Roles per CLAUDE.md's Project Profile; test credentials in a memory file, never the repo. Drive with `playwright-cli` (pattern in `/verify-feature`), one named session per role (`-s=qa-<role>`). Each session keeps its own cookies, so every role stays signed in side by side on one dev server instead of logging out and back in.
 
@@ -23,7 +24,7 @@ Sweep every feature in scope, report every one, fix what's fixable, flag what is
 
 | Status | Meaning | Requires |
 |---|---|---|
-| PASS | Works, proven | Screenshot path in report |
+| PASS | Works, proven | What was driven and what it showed; screenshot path when one was kept |
 | FAIL | Broken | Defect entry (numbered D1, D2, …) with file:line root cause where known |
 | BLOCKED | Needs code/design that doesn't exist | Exact reason: what's missing, what would unblock |
 | COVERED-BY-UNIT | Math/logic proven by unit tests | Test file name |
@@ -35,7 +36,7 @@ Cross-check UI against the database with the project's DB access (e.g. an MCP SQ
 - **Mechanical fixes (fix silently):** wrong query method, missing insert column, CSS overflow, invalid HTML, stale hardcoded values, dead code. Anything where "correct" is objective.
 - **Judgment-call fixes (fix, but flag):** display semantics, wording, what a "correct" data value is, live-DB data corrections. Fix them, but mark each distinctly in the report so the call can be vetoed.
 - **BLOCKED = decision-only.** New code, new features, unfinished design handoffs: present, never build unprompted.
-- Every fix is browser-verified with a `fix-*.png` screenshot, and the project's test + build commands must be green before declaring done.
+- Every fix is browser-verified, and the project's test + build commands must be green before declaring done. Keep a `fix-*.png` in `screenshots/` when the fix is one a person would want to look at; the drive is the proof either way.
 
 ## The ratchet — judgment calls shrink over time
 

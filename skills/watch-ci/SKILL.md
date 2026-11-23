@@ -3,8 +3,8 @@ name: watch-ci
 description: >
   Babysit GitHub Actions after a push until every run is green, diagnosing
   and fixing failures as they land. Use after any push when asked to "watch
-  CI", "babysit the pipeline", "make sure CI passes", or when the user
-  accepts the /finish-branch watch offer.
+  CI", "babysit the pipeline", "make sure CI passes", or when
+  /finish-branch runs it after the push.
 ---
 
 # Watch CI
@@ -29,7 +29,7 @@ All watched runs green: report run URLs and stop.
 
 1. `gh run view <run-id> --repo <repo> --log-failed`
 2. Reproduce locally before touching anything: run the failing step from the app directory using the project's build/test/lint commands (per CLAUDE.md's Project Profile). A failure that doesn't reproduce locally is environmental; investigate the workflow context (runtime version, missing env, cache) before blaming the code.
-3. Fix the root cause, commit to the same branch, push (confirmation rule, never bypass), watch the new run from step 1.
+3. Fix the root cause, commit to the same branch, push (plain `git push`; never force), watch the new run from step 1.
 
 **Cap: 3 fix rounds.** Still red after that means the diagnosis is wrong somewhere; stop and report everything found rather than thrashing.
 

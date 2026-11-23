@@ -18,7 +18,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 
 # scroll-craft
 
-> **Local rules** (these win over the rest of this file). Vendored from `nateherkai/scroll-craft` (MIT). **The design floor is the project's design system, not this skill's defaults:** set its six tokens and two fonts from the project's own tokens (for a WorkLife Wellness or WorkLife Strategy Group site, the brand's `tokens.json` via `/wlw-brand` or `/wlsg-brand`), and keep the brand's rules on color, type and emphasis. This skill owns the page grammar, the visitor journey and the signature move. Run `/visual-spec` per section after the page grammar is set. Prefer supplied photos and footage; generating assets through kie.ai costs money per still and per clip, so ask before the first paid call. Never edit `engine/` per project.
+> **Local rules** (these win over the rest of this file). Vendored from `nateherkai/scroll-craft` (MIT). **The design floor is the project's design system, not this skill's defaults:** set its six tokens and two fonts from the project's own tokens, and keep the brand's rules on color, type and emphasis. This skill owns the page grammar, the visitor journey and the signature move. Run `/visual-spec` per section after the page grammar is set. Prefer supplied photos and footage; generating assets through kie.ai costs money per still and per clip, so ask before the first paid call. Never edit `engine/` per project.
 
 Scroll is the only input every visitor already knows how to use. This skill
 treats it as a timeline: the wheel is a scrubber, the page is a film with real

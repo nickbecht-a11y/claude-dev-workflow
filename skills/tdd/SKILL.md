@@ -46,16 +46,15 @@ RIGHT (vertical):
 
 Before writing any code:
 
-- [ ] Confirm with user what interface changes are needed
-- [ ] Confirm with user which behaviors to test (prioritize)
+- [ ] Decide what interface changes are needed, and state them
+- [ ] Decide which behaviors to test, in priority order, and state them
 - [ ] Identify opportunities for [deep modules](deep-modules.md) (small interface, deep implementation)
 - [ ] Design interfaces for [testability](interface-design.md)
 - [ ] List the behaviors to test (not implementation steps)
-- [ ] Get user approval on the plan
 
-Ask: "What should the public interface look like? Which behaviors are most important to test?"
+Answer for yourself: "What should the public interface look like? Which behaviors are most important to test?" Then say what you decided in one short block and start. The branch stops once, at the Go gate (CLAUDE.md), and interface shape is a judgment the codebase answers better than the user can.
 
-**You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
+**You can't test everything.** Focus testing effort on critical paths and complex logic, not every possible edge case. Take that call yourself. It reaches the Go gate only when the issue's own spec is genuinely ambiguous about which behavior is correct, in which case the question is about the behavior, not about the test.
 
 ### 2. Tracer Bullet
 

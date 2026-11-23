@@ -12,20 +12,21 @@ Drive the browser with `playwright-cli` through Bash, always with a named sessio
 **Default to the local dev server** (command and URL per CLAUDE.md's Project Profile). It is the only place uncommitted local changes appear. Use the production URL only when the goal is to inspect the deployed build. If the port is taken, use the actual port the dev server prints.
 
 ```bash
-# 1. Open at a 390px mobile viewport
-playwright-cli -s=mobile open DEV_SERVER_URL
-playwright-cli -s=mobile resize 390 844
+# 1. Sign in with the Login command from CLAUDE.md's Project Profile (same origin you will open)
+<login command> <role> "<scratchpad>/state-<role>.json"
 
-# 2. Log in (selectors are project-specific; record them in CLAUDE.md if nonstandard)
-playwright-cli -s=mobile fill 'input[type="email"]' "EMAIL"
-playwright-cli -s=mobile fill 'input[type="password"]' "PASSWORD" --submit
+# 2. Open at a 390px mobile viewport, load the session, go to the page
+playwright-cli -s=mobile open DEV_SERVER_URL
+playwright-cli -s=mobile state-load "<scratchpad>/state-<role>.json"
+playwright-cli -s=mobile resize 390 844
+playwright-cli -s=mobile goto DEV_SERVER_URL/<route>
 ```
 
-Test credentials live in a memory file, never the repo. When touch behavior matters (tap targets, hover-only UI), open with `--device "iPhone 15"` instead of resizing.
+Never type a password with `playwright-cli fill`: it echoes the value into the transcript. See `verify-feature` for the login command. When touch behavior matters (tap targets, hover-only UI), open with `--device "iPhone 15"` instead of resizing.
 
 ## Navigating on mobile
 
-Sidebars usually hide behind a hamburger on mobile. Click it by selector (text-less buttons need one), then the nav link:
+Sidebars usually hide behind a hamburger on mobile. Click it by selector (text-less buttons need one; CLAUDE.md's Mobile Layout section names it), then the nav link:
 
 ```bash
 playwright-cli -s=mobile click 'button.hamburger-selector'
@@ -48,13 +49,9 @@ playwright-cli -s=mobile screenshot --full-page --filename="<abs path>/screensho
 
 Screenshots go to the project's screenshots directory (default `screenshots/` at repo root); always pass an absolute path. Read the file back with the Read tool to view it visually. Run `playwright-cli -s=mobile close` when finished.
 
-## Project mobile layout rules — fill in as you learn them
+## Project mobile layout rules
 
-Keep a table here (or in CLAUDE.md) of the project's non-obvious mobile constraints, recorded the first time each one bites. Examples of what belongs in it: fixed-element clearance ("all page containers need `padding-top` ≥ 72px to clear the hamburger"), the breakpoints actually in use per page, sticky-header offsets.
-
-| Element | Rule |
-|---|---|
-| _(none recorded yet)_ | |
+They live in CLAUDE.md's **Mobile Layout** section, not here, so this file stays identical across projects. Read it before editing, and record each non-obvious constraint there the first time it bites: fixed-element clearance ("all page containers need `padding-top` ≥ 72px to clear the hamburger"), the breakpoints actually in use per page, sticky-header offsets.
 
 ## Common CSS patterns
 

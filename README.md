@@ -1,8 +1,8 @@
 # Claude Dev Workflow
 
-A portable, seven-stage development workflow for Claude Code: 29 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
+A portable, seven-stage development workflow for Claude Code: 30 skills plus a CLAUDE.md template that wires them together. Drop it into any project and get the same pipeline: interrogate the idea, write the PRD, slice it into vertical issues, build with enforced gates, prove it in a real browser, review with fresh eyes, ship.
 
-Tuned for Claude Opus 5, which verifies and corrects its own work as it goes. The workflow therefore never instructs a re-check — it defines what finished looks like and reviews only where fresh information exists. See [Design principles](#design-principles-why-it-works).
+Written for current Claude models, which verify and correct their own work as they go. The workflow therefore never instructs a re-check — it defines what finished looks like and reviews only where fresh information exists. See [Design principles](#design-principles-why-it-works).
 
 ## The pipeline
 
@@ -14,7 +14,7 @@ Tuned for Claude Opus 5, which verifies and corrects its own work as it goes. Th
 | 4. Slice | `to-issues` | Vertical-slice (tracer bullet) issues in a local markdown tracker |
 | 5. Build | `implement`, `tdd`, `new-migration` | One orchestrator per issue enforces gate order; review diffs from the recorded issue base; UI slices without an approved visual spec route through `visual-spec` first; loop-safe for unattended backlog runs |
 | 6. Prove | `verify-feature` | Real browser, real role, driven end-to-end. Not done until it's been run |
-| 7. Ship gate | `finish-branch`, `watch-ci`, `sharpen`, `drawio` | The deep code review and a `/security-review` of the whole branch, ordered merge, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
+| 7. Ship gate | `finish-branch`, `review`, `watch-ci`, `sharpen`, `drawio` | The deep `review` and a `/security-review` of the whole branch, ordered merge, unattended push, CI babysitting, retro — sharpen's fixes are committed, never left dirty on the default branch |
 
 Not every task runs the whole pipeline. CLAUDE.md routes work by **lane**, picked on observable predicates rather than size feelings: feature work enters at stage 1; advisory passes (`improve`, `improve-codebase-architecture`) are read-only and gateless, and their plans enter at stage 4 — `to-issues` slices the plan directly, no re-grilling; behavior-preserving quick fixes skip the tracker entirely (fix → verify → review → commit); visual polish and debugging have their own on-ramps. Lanes scale ceremony, never honesty — verification, permissions, and the branch guard bind in every lane, and work that touches schema or adds behavior takes the feature lane however small it feels.
 
@@ -24,20 +24,37 @@ Off-pipeline: `qa-sweep`, `mobile-view` (quality passes), `compact-checkpoint`, 
 
 ## Install into a project
 
-1. Copy the skills and agents into the project (or into `~/.claude/` once, to get them in every project on the machine):
+1. Put the skills and agents into the project, one of two ways:
 
-   ```sh
-   cp -r skills/* <project>/.claude/skills/
-   cp -r agents/* <project>/.claude/agents/
-   ```
+   - **Linked** (recommended for a new project): a junction or symlink per skill and agent, from `<project>/.claude/skills/<name>` to `skills/<name>` here. An edit made while working lands in this repo directly, so every project gets it.
+   - **Tracked copies**, when the project wants its skills versioned with it:
 
-   The `agents/` definitions back the fresh-context, model-pinned subagents that a few skills dispatch (`spec-reviewer` for `/implement` spec review, `ui-prototyper` for the `/prototype` UI branch). Skip this copy and those skills fall back to an unpinned in-session review.
+     ```sh
+     cp -r skills/* <project>/.claude/skills/
+     cp -r agents/* <project>/.claude/agents/
+     ```
 
-2. Copy `CLAUDE.md.template` to `<project>/.claude/CLAUDE.md` (or merge its sections into an existing CLAUDE.md) and fill in the **Project Profile** table. The skills reference those slots by name (dev server URL, test commands, issues directory, roles, repo layout) instead of hardcoding any one project's values.
+     Copies drift. Check them with the drift check below, and port a project's improvements back here rather than letting them live in one copy.
+
+   Do not also put a plain copy at `~/.claude/skills/<name>`: the user-level copy takes precedence over the project's and shadows it silently. If you want the skills in every project on the machine, link the user-level path to the same source.
+
+   The `agents/` definitions back the fresh-context subagents a few skills dispatch (`spec-reviewer` for `/implement` spec review, `ui-prototyper` for the `/prototype` UI branch). Skip them and those skills fall back to an in-session review.
+
+2. Copy `CLAUDE.md.template` to `<project>/.claude/CLAUDE.md` (or merge its sections into an existing CLAUDE.md) and fill it in. The skills read project facts from it by name rather than hardcoding them: the **Project Profile** table (dev server, test commands, issues directory, roles, the **Login** command, repo layout), and the **Design System** and **Mobile Layout** sections that `visual-spec` and `mobile-view` read. That is what lets every skill file stay identical across projects.
+
+   The **Login** command is the one piece you write per project: a short script that signs in as a role and saves the browser session to a file, so `playwright-cli state-load` starts signed in without a password ever being typed into the transcript. `/verify-feature` describes what it must do.
 
 3. Optional, per taste: delete the Communication Style section to keep normal verbosity; delete skills you won't use (nothing else references them by anything but slash name).
 
 Why a template and not a ready CLAUDE.md: Claude Code only reads the CLAUDE.md of the project it is running in. A CLAUDE.md sitting in this repo does nothing for your other projects; the workflow wiring has to live in each target project's own CLAUDE.md. The template keeps that wiring identical everywhere while the Project Profile carries the per-project facts.
+
+## Keeping projects in sync
+
+```sh
+node tools/drift-check.mjs <project-root>
+```
+
+Compares every file under `skills/` and `agents/` here with the project's `.claude/` copy, ignoring line endings, and prints each one that differs or is missing, then `inspected N = same + differs + missing + not installed`. A skill the project chose not to install is not counted as drift. Since project facts live in the project's CLAUDE.md, any difference is a real change: port it here, or bring the project's copy back in line. `sharpen` runs it at the end of every branch for projects on tracked copies.
 
 ## MCP servers
 
@@ -100,11 +117,11 @@ Most skills are stack-agnostic. The exceptions:
 | `new-migration` | Supabase (MCP server, RLS, SQL migrations). Optional companion: Supabase's own skills, `npx skills add supabase/agent-skills` | Rewrite steps 3-4 for your migration tool; keep the gates (numbered files as source of truth, no hand-edited prod schema) |
 | `verify-feature`, `mobile-view`, `qa-sweep` | Web app + `playwright-cli` on PATH | Any browsable app works; install the CLI (below) |
 | `watch-ci`, `finish-branch` | GitHub Actions + `gh` CLI | Swap the `gh run` commands for your CI's CLI |
-| `visual-spec` | A design system you record in its fill-in tables | Fill the tables the first time you use it |
+| `visual-spec` | A design system recorded in CLAUDE.md's Design System section | Fill it in the first time you use it |
 | `better-sqlite3-rebuild` | Node + better-sqlite3 | Delete if unused |
 | `scroll-craft` | Static HTML landing pages; optional kie.ai key for generated assets (paid) | Delete for app-only projects |
 
-`mobile-view` and `visual-spec` also contain fill-in tables meant to accumulate project-specific rules over time; they start empty here.
+`mobile-view` and `visual-spec` read the project's rules from CLAUDE.md's Mobile Layout and Design System sections, which start empty in the template and accumulate as the project grows.
 
 ## Design principles (why it works)
 
@@ -113,11 +130,11 @@ Most skills are stack-agnostic. The exceptions:
 - **Evidence before claims.** No "done", "fixed", or "passing" without having run the proving command this turn and read its output. A subagent's success report is a claim to verify against the diff, not proof.
 - **Fresh eyes can't be fooled.** Spec review runs in a subagent with zero session history reading the diff from the issue's recorded base commit; it reads what the issue says, not what the implementer meant, and never gets told what not to flag.
 - **Proof means running it.** A feature is done when a real browser, driven as the right role against real data, shows it working — that catches the dead route, the missing env var, the permission rule denying the role, and the empty screen, none of which a test run or a code read will mention. The screenshot is how the agent looks; it isn't the deliverable.
-- **Check once, at the right altitude.** Current models self-correct as they write, so the workflow doesn't ask them to re-read their own work. It states what finished looks like, then spends its review budget where a second pair of eyes actually sees something new: a cold read against the spec per issue, and one deep quality pass per branch.
+- **Check once, at the right altitude.** Current models self-correct as they write, so the workflow doesn't ask them to re-read their own work. It states what finished looks like, then spends its review budget where a second pair of eyes actually sees something new: per issue, a cold read against the spec and an adversarial read of the diff; per branch, one deep pass that sees how the issues interact. The per-issue adversarial pass carries a tripwire that cuts it again if it stops finding anything the other two miss.
 - **Delete on completion.** Finished issues and plans leave the working tree; git history is the archive. The live tree only describes the present.
 - **Lanes scale ceremony, never honesty.** Work enters the spine at the stage its class calls for; the universal gates (evidence, permissions, branch guard) bind in every lane.
 - **The system grows itself, slowly.** `sharpen` fixes workflow friction with the cheapest change that prevents recurrence; new skills need the same friction logged three times.
 
 ## Credits
 
-Several skills started from or were shaped by community skills (`tdd`, `grill-me`, `improve`, `improve-codebase-architecture`, `drawio`, `better-sqlite3-rebuild`, `to-prd`/`to-issues` lineage) and were adapted; `scroll-craft` (nateherkai/scroll-craft), `playwright-cli` (microsoft/playwright-cli) and the three launch and operations skills (addyosmani/agent-skills) are vendored with local rules on top; the rest were purpose-built for this workflow.
+Several skills started from or were shaped by community skills (`tdd`, `grill-me`, `improve`, `improve-codebase-architecture`, `drawio`, `better-sqlite3-rebuild`, `to-prd`/`to-issues` lineage, `review` from mattpocock/skills) and were adapted; `scroll-craft` (nateherkai/scroll-craft), `playwright-cli` (microsoft/playwright-cli) and the three launch and operations skills (addyosmani/agent-skills) are vendored with local rules on top; the rest were purpose-built for this workflow.

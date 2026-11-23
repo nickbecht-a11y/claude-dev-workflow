@@ -54,21 +54,19 @@ Before declaring the task done, read `.claude/tasks/active.md` and count uncheck
 
 This is a hard rule. Never summarize as complete while `- [ ]` items remain in the file.
 
-## Step 4 — Archive
+## Step 4 — Delete
 
-When all items are checked:
+When all items are checked, delete the tracker. Git history is the archive.
 
-1. Move the file to `.claude/tasks/archive/` with a timestamped name: `YYYY-MM-DD-<task-slug>.md`
-2. Confirm to the user: "All steps complete. Archived to `.claude/tasks/archive/<filename>`."
+Do not move it to an archive folder: its whole purpose ends when the task does. If the tracker was ever committed, `git log --diff-filter=A --name-only -- .claude/tasks/` still finds it.
 
-Use PowerShell `Move-Item` or `Copy-Item` + delete to archive. Example:
-```powershell
-Move-Item ".claude/tasks/active.md" ".claude/tasks/archive/2026-06-25-migration-rls-fix.md"
-```
+A tracker is a document under CLAUDE.md's Permissions carve-out, so deleting it needs no confirmation, provided it is tracked. If it never got committed (`git log --all -- <path>` returns nothing) it has no history to recover from, and the carve-out does not apply: delete it only with a go-ahead.
+
+**Do not commit the tracker on every tick.** Ticking a box is not a commit-worthy event; the file exists to survive compaction, not to be versioned. Commit it once at branch end if at all, together with the work.
 
 ## Rules
 
 - **File is source of truth, not context.** Even if you remember the steps, re-read the file before declaring done.
 - **Multiple sessions**: if a new `/track` is invoked while `active.md` already exists, start a new file anyway — rename the old one to `active-previous.md` first, or append a timestamp suffix. Do not block or refuse.
 - **Context compression**: the file persists on disk. After compaction, re-read `.claude/tasks/active.md` at the start of the next turn to restore task state.
-- **Never skip the archive step.** A task without an archive entry is a task that might get reopened.
+- **Never leave a finished tracker on disk.** A stale tracker actively misleads: a later session plans from a claim about the world that is no longer true.

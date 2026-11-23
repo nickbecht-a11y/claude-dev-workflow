@@ -21,6 +21,33 @@ Use these rules for professional draw.io routing. They apply to architecture dia
    - Vertical edges: `x=12` or stronger.
    - Do not use `labelBackgroundColor` to hide the line.
 
+## Geometry Facts That Bite
+
+Two mxGraph details that silently produce a no-op if you assume otherwise:
+
+1. **An edge label's relative `x` runs -1 to +1, not 0 to 1.** `-1` is the source
+   end, `0` the midpoint, `+1` the target end. Setting `x="0.12"` to mean
+   "just after the source" actually parks the label a hair past the midpoint,
+   which is usually exactly where an unrelated node sits.
+2. **A newline inside a `value` may be written `&#xa;` as well as `&#10;`.**
+   Any code that measures a label must decode both, or a multi-line label is
+   measured as one very long single line and sized wrongly.
+
+## Placing a Label That Has Nowhere To Go
+
+When an edge crosses a lane whose nodes span its full width, no point along that
+edge is clear, and searching along the line cannot succeed. Two fixes that do:
+
+- **Put it in a lane gap.** The vertical strip between two lanes is node-free at
+  every y, which makes it immune to the fact that draw.io routes orthogonally
+  while your model probably assumes a straight line. Widen the gap if the label
+  does not fit; a label wider than the gap will creep back onto a node.
+- **Give the lane a gutter and route skip edges down it.** An edge between two
+  non-adjacent nodes in the same lane is otherwise drawn straight through
+  whatever sits between them. A node-free channel down one side of the lane
+  fixes both the crossing and the label, since the edge's midpoint then lands in
+  clear space.
+
 ## Audit Checklist
 
 - Does any edge cross an unrelated node?

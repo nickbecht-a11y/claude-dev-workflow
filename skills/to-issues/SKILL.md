@@ -1,7 +1,6 @@
 ---
 name: to-issues
 description: Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues.
-disable-model-invocation: true
 ---
 
 # To Issues
@@ -49,30 +48,29 @@ Example — the same feature, sliced two ways:
 - Horizontal (wrong): (1) create all tables, (2) build all API routes, (3) build the dashboard UI.
 - Vertical (right): (1) dashboard shows one real metric from a real row end-to-end, (2) add a second metric, (3) user can filter by date.
 
-### 4. Quiz the user
+### 4. Self-quiz, then publish
 
-Present the proposed breakdown as a numbered list. For each slice, show:
+**Do not present the slice list to the user.** The rules in step 3 are the rules the user would apply, and re-confirming a cut the skill already made to spec is ceremony. The branch stops once, at the Go gate (CLAUDE.md), and the slice list is explicitly not part of it.
 
-- **Title**: short descriptive name
-- **Type**: HITL / AFK
-- **Blocked by**: which other slices (if any) must complete first
-- **User stories covered**: which user stories this addresses (if the source material has them)
+Run the five questions against your own breakdown instead, and re-cut where the answer is unsatisfying:
 
-Ask the user:
-
-- Does the granularity feel right? (too coarse / too fine)
-- Is any slice still horizontal — a layer rather than a usable behavior?
+- Does the granularity feel right, or is a slice too coarse or too fine?
+- Is any slice still horizontal, a layer rather than a usable behavior?
 - Are the dependency relationships correct?
 - Should any slices be merged or split further?
-- Are the correct slices marked as HITL and AFK?
+- Are the correct slices marked HITL and AFK?
 
-Iterate until the user approves the breakdown.
+What *does* go to the Go gate is anything you cannot resolve this way: a genuine product choice inside a slice, two defensible scopes with different costs, an HITL slice whose human step needs defining. Carry it there with a recommendation. If nothing is open, contribute nothing.
 
 ### 5. Publish the issues
 
-For each approved slice, write a file `<issues-dir>/<NN>-<slug>.md` using the issue body template below, with `status: ready-for-agent` in a frontmatter block unless instructed otherwise.
+For each slice, write a file `<issues-dir>/<NN>-<slug>.md` using the issue body template below, with `status: ready-for-agent` in a frontmatter block unless instructed otherwise.
 
 Write issues in dependency order (blockers first) so you can reference real issue numbers in the "Blocked by" field.
+
+Issue files are read by agents, not by the user. Write them for that reader: plain-English framing does not apply here. What must **not** live only here is an out-of-scope discovery or a suggestion, since the user never opens these files. Those go to the chat report's **Suggestions** section.
+
+**Commit the issue files, and the PRD if this run produced one, before implementation starts.** They are untracked until then, and an untracked file has no history: `/implement` deletes each issue file as it closes, so on the first issue that deletion is permanent and no commit can honestly record it. One `docs(...)` commit for the planning artifacts, then the implementation commits delete them one by one, which is what makes `git log --diff-filter=A -- <issues-dir>` the archive the numbering step depends on.
 
 <issue-template>
 ## Parent

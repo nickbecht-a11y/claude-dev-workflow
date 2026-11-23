@@ -9,7 +9,9 @@ project grows. Two rules for every line you add:
   2. One hop maximum: point directly at a code file, doc, skill, or memory.
 Skills carry their own descriptions in frontmatter; never re-describe a
 skill here. This file only records what descriptions can't: the order the
-skills run in and which gates are mandatory.
+skills run in, which gates are mandatory, and the project facts the skills
+read by name (Project Profile, Design System, Mobile Layout). Keeping those
+facts here is what lets every skill file stay identical across projects.
 -->
 
 ## Project Profile
@@ -19,58 +21,159 @@ skills run in and which gates are mandatory.
 | Slot | Value |
 |---|---|
 | App directory | `<dir containing package.json, or . >` |
-| Dev server | `<command>` → `<URL, e.g. http://localhost:5173>` |
+| Dev server | `<command>` → `<URL, e.g. http://localhost:5173>` (if the port is taken, use the port it prints) |
 | Build / test / lint | `<build cmd>` / `<test cmd>` / `<lint cmd>` |
-| Production URL | `<URL>` — never verify local changes here; deployed build only |
+| Production URL | `<URL>`: never verify local changes here; deployed build only |
 | Issue tracker | local markdown in `<issues dir, e.g. issues/>`; `<NN>-<slug>.md`, PRDs `prd-<slug>.md`; completed files deleted, history via `git log --diff-filter=A --name-only -- <issues dir>` |
 | Roles + test logins | `<roles, or "single role">`; credentials in a memory file, never this repo |
-| Repo layout | `<single repo, default branch X>` or `<nested: inner repo + outer pointer repo>` |
-| Database + migrations | `<e.g. Supabase, migrations in supabase/, applied via MCP>` or `<none>` |
+| Login | `<command that signs in as a role and saves a session file, e.g. node .claude/scripts/login-as.mjs <role> <state-file>>`; see `/verify-feature` for what it must do |
+| Repo layout | `<single repo, default branch X>` or `<nested: inner repo + outer pointer repo; merge order inner first; feature branches in both>` |
+| Database + migrations | `<e.g. Supabase, numbered SQL in supabase/, applied via MCP; all schema changes through /new-migration>` or `<none>` |
 | Architecture docs | `<e.g. docs/*.drawio + update rule>` or `<none>` |
+| Skills | from `<path to claude-dev-workflow>`, either linked (junction or symlink, so an edit lands in the workflow repo directly) or as tracked copies in `.claude/skills/` (versioned with this project); with copies, `node <that path>/tools/drift-check.mjs <this project>` lists anything that has drifted |
 
 ## Output Folders
 
-Screenshots go in `screenshots/`, plans/PRDs/specs in `plans/`, handoff docs in `handoffs/`, QA reports in `qa-report/` (all at repo root).
+Screenshots go in `screenshots/`, plans/PRDs/specs in `plans/`, handoff docs in `handoffs/` (all at repo root). `qa-report/` holds deployed edge function probes only, per the evidence rule under Verification. Routine UI verification writes no file.
 
-Throwaway working files never enter the repo — routine verification captures, scratch scripts, intermediate output. Those go in the session scratchpad. A file earns a repo folder only when a person has a reason to open it later.
+Throwaway working files never enter the repo: routine verification captures, scratch scripts and intermediate output go in the session scratchpad. A file earns a repo folder only when a person has a reason to open it later.
 
 ## Communication Style
 
-<!-- Optional. Delete this section to keep normal verbosity. -->
+<!-- Optional. Delete the caveman line to keep normal verbosity; keep the report. -->
 Caveman mode always active (`.claude/skills/caveman/SKILL.md`). Terse, no filler, full accuracy. Off only on "stop caveman" or "normal mode".
+
+### The report
+
+Every issue and every branch closes with this block, in chat. All five headings always print; write "none" when a section is empty, so a category that collected nothing stays visible.
+
+```
+## <issue NN and title, or branch name>
+
+**Done** - plain English, what you can now do
+**Still needs work** - incomplete items, each with why
+**Bugs** - found and fixed; anything not fixed, with why
+**Suggestions** - out-of-scope ideas this work surfaced
+**Questions** - decisions needed from the user
+```
+
+- **Done** is written for a product owner, not an engineer. Lead with what the user can now do. Table names, migration numbers and file paths belong in a short "behind the scenes" tail if at all. When something went wrong and is already fixed, open with the current state; the story of the defect comes after.
+- **Bugs** is not a place to park work. A bug found while building is fixed in that issue's commit. It appears here as fixed, and as unfixed only when the fix needs a product decision, with the proposed fix in **Questions**.
+- **Suggestions** is the only home for anything discovered outside what the grill settled. The user does not read issue files, so writing it only into one does not count.
+- **Questions** is for decisions, not status. If it can be decided from the code, the spec, or a sensible default, decide it and say so under **Done**.
 
 ## Permissions
 
-Always confirm before: `rm`, `del`, `rmdir`, `Remove-Item`, `git rm`, `git reset`, `git push`, `git checkout`, `git rebase`. Never bypass.
+Always confirm before: `rm`, `del`, `rmdir`, `Remove-Item`, `git rm`, `git reset`, `git checkout`, `git rebase`. Never bypass.
+
+**`git push` runs unattended; force-pushing never runs at all.** Plain push is off the confirm list so an unattended branch can reach CI. `--force`, `-f`, `--force-with-lease` and any `+ref` refspec stay blocked outright, because that push destroys history rather than adding to it. Branch creation (`git checkout -b`, `git switch -c`) is unattended too; bare `git checkout` still confirms, since `git checkout -- <path>` discards work.
+
+**Documents are the exception: deleting one needs no confirmation**, because the words are recoverable from git and a stale one actively misleads: completed issue files, superseded plans, spent handoffs, finished trackers. Delete them as the workflow says, and say so in the commit. The carve-out rests on "recoverable from git", so confirm the file is tracked first (`git log --all -- <path>`); an untracked file has no history and is treated as code. The confirmation rule still binds for anything that is not prose: source, migrations, SQL, tests, config, assets, `.env`, and any directory delete that could sweep those up. When in doubt whether a path is a document, it is not.
+
+**Commit messages:** multi-line via repeated `-m`, never `-F -` (stdin never closes and the commit hangs). A backtick inside `-m "…"` is command substitution and silently eats the word, so drop backticks or write the message to a file and `git commit -F <file>`.
 
 ## Verification
 
-Evidence before claims. No "done", "fixed", "passing", or "works" — including paraphrases or anything implying success — without having run the proving command this turn and read its output. A subagent's success report is a claim to verify against the VCS diff, not proof.
+Evidence before claims. No "done", "fixed", "passing", or "works", or any paraphrase implying success, without having run the proving command this turn and read its output. A subagent's success report is a claim to check against the diff, not proof.
 
-This is a rule about what you may *claim*, not an instruction to re-check your work. Correcting yourself while writing is not the same as having run the thing; nothing substitutes for the command and its output.
+This governs what you may *claim*; it is not an instruction to re-check your work. Red flags: "should work now", "looks right", satisfaction before evidence, committing or pushing without a fresh run. Where the workflow assigns proof to the user (the pure-style eyeball), say "applied, awaiting your eyes"; that is not a done claim.
 
-Red flags you're about to violate this: "should work now", "looks right", satisfaction before evidence ("Great!", "Perfect!"), or committing/pushing without a fresh run.
+**Never pipe a gate command into `tail`/`head` when you will act on its result.** The pipe replaces the command's exit code with the pager's, so `npm run lint | tail -3 && git commit` commits over a failing lint. Run the gate bare, or `cmd 2>&1 | tail -3; echo "EXIT=${PIPESTATUS[0]}"`.
 
-Where the workflow assigns proof to the user (e.g. the pure-style eyeball), say "applied, awaiting your eyes" — that is not a done claim.
+**A check proves nothing until you know what it examined.**
+- Print the inspected count beside the verdict, and reconcile the totals (inspected = same + differs + missing). Zero inspected is a broken script, not a clean result.
+- Pair every absence assertion with a presence assertion in the same run. All-false in both directions means the check never read its input.
+- A fixture selected with `limit 1` that came back NULL makes every later statement match zero rows, and zero rows is not an error. Assert the fixture exists and print it.
+- Compare content hashes, never a count of matching diff lines. Read a cleanup back in a separate statement from the delete.
+- A checker that reads source as data excludes comments first. Prefer asserting the sites over asserting how many there are: a list names what moved, a number does not.
+- Write verification scripts with the Write tool whenever they contain regexes: any script the shell quotes (`node -e`, `python -c`, heredocs) can lose its backslashes and silently match nothing.
+
+**Edits.** Anchor each multi-site edit to something unique, assert the match count before writing, and read the result rather than the source. Never regex an import block; use the Edit tool. Patches must be line-ending aware: a pattern matching `\n` finds nothing in a CRLF file.
+
+**Environments.** A local green is not a CI green when the two differ (an env file, a served font, a running dev server). Before claiming a gate green, ask what this machine has that CI does not, and exercise any fallback path that difference creates.
+
+**Drive the failure path.** A branch that exists to report an error can itself be broken, and it is invisible until needed. Make something go wrong and watch it report.
+
+**Enumerate.** Changing a shared function means checking every caller, not just the one you are working on. Narrowing a value several consumers read is the same enumeration in reverse: list what each consumer *accepts* before applying one rule everywhere. When you harden a loop, carry the fix to the loop beside it. A fix to a privilege hole enumerates every writer, not just the one that leaked.
+
+**Searches.** A search that found nothing has not proved absence: confirm it covered where the thing would live. A search that found something has not proved it is the thing you meant: open the file and find it. An identifier that exists is not necessarily the one in play; resolve a class to the markup that renders it, a key to the row it names.
+
+**Measure every premise**, whoever stated it: a number in a spec, a figure the app computed (check one case against an independent calculation that takes its inputs from the source of record), where a component renders (grep its usage; clear any state your earlier checks left behind). Sweeping a page means sweeping the components it imports. When a value is half of a pair (ink and plate, a badge and its neighbour), changing one half means checking the other.
+
+**Paint is not mechanism.** A screenshot proves rendering only: for a CSS state read the computed style, for accessibility the accessibility tree, and drive the state that breaks it. A green API probe is diagnosis; if the complaint is "the button does nothing", the proof is a click. Prove the operation, not the thing beside it: say in one sentence what would be broken if the proof passed anyway.
+
+**Write evidence to a file only when it cannot be re-derived later.**
+- Schema → `<NN>-<slug>.verify.sql` beside the migration, measured numbers as comments. Once applied, the before-state cannot be recaptured.
+- Deployed edge function behaviour → `qa-report/<NN>-<slug>.md`: probe output, fixture composition, what the run does *not* establish. Deployed state is not in the diff.
+- UI → no file. Drive it, and report what it showed in the report's **Done** section.
+- Write measured numbers after the run, never while drafting.
+
+**Acceptance criteria.** Tick them in the issue file one by one before deleting it, and paste the ticked list into the commit body, since the ticked file is otherwise never a commit. A criterion about what a user *receives* is ticked against the surface (generate the thing and look), not the diff.
+
+**A repo copy of a published document is a claim about the artifact.** Before republishing to an existing URL, read the live version and diff it against the repo copy.
+
+## Database (Supabase)
+
+<!-- Keep if the project is on Supabase; delete otherwise. Add the project's own rules below these. -->
+
+- Schema lives in numbered migration files, the source of truth; never hand-edit prod schema without capturing it in a migration. All schema changes go through `/new-migration`. Sort migration numbers numerically, and claim a number only after checking every ref (see Parallel Sessions).
+- **RLS: never hardcode role names in policies.** Route role checks and cross-table lookups through SECURITY DEFINER helpers (e.g. `public.is_admin()`). If data vanishes, count rows as postgres first; rows that exist mean RLS.
+- **Simulating a user takes two statements.** The MCP connects as `postgres`, which bypasses RLS, so a jwt claim alone changes `auth.uid()` and nothing else. `set local role authenticated;` then `select set_config('request.jwt.claims', '{"sub":"<uuid>"}', true);`, the queries, `reset role;`. `reset role` does not clear the claim. A results table needs `grant insert ... to authenticated` first. Triggers fire for every role, which is why a claim-only test looks valid right up until it is pointed at a policy.
+- **`begin; … rollback;` does not protect you in the MCP.** For a write probe, capture the before-state, re-read after, restore explicitly; better, probe a throwaway row you created. A "re-save the same value" probe is a no-op only for the account the value came from.
+- **Permissive policies OR their USING and, separately, their WITH CHECK clauses**, so a row can enter an UPDATE through one policy and leave through another. With two or more UPDATE policies on a table, probe every old-state × new-state pair or pin transitions in a trigger.
+- "new row violates row-level security policy" on an UPDATE usually means the SELECT policy: the new row must stay readable. If it leaves the caller's read scope, the write belongs in a SECURITY DEFINER function.
+- Every SECURITY DEFINER function gets `revoke all ... from public` and a grant to exactly the role that calls it; otherwise `anon` can call it as an RPC. Its authorization check must refuse a null tenant id (`IS NOT DISTINCT FROM` matches null to null).
+- **Edge functions run as `service_role`.** A table a function reads or writes needs `grant ... to service_role`, including an existing table the function starts touching. The function authorizes its own caller (an anon key is a valid JWT with no user behind it, so "no user" proves nothing); CORS is not a control. A function pg_cron calls is deployed `--no-verify-jwt` and authenticates a shared secret. Each function bundles its own copy of `_shared`, so redeploy every importer after changing it.
+- A gate on who may read covers every way in: table REST, RPC, Storage, Realtime, and edge functions.
+- Accounts are never created from the browser; role and tenant columns are minted server-side only.
+- Always destructure `error`: `const { data, error } = await query`. Bare `{ data }` swallows RLS failures.
+- **Project-wide restrictive policies** every new table must carry (a two-factor gate, a tenant guard): `<list them, or "none">`.
+
+## Design System
+
+<!-- Read by /visual-spec. Fill in once; /frontend-design's first run can establish it. -->
+
+| Surface | Design source of truth |
+|---|---|
+| `<e.g. app portal>` | `<existing shell components + CSS variables>` |
+
+| Auto-resolved rule | Value |
+|---|---|
+| Text on dark / light background | `<…>` |
+| Buttons | `<the one CTA colour; colours forbidden on buttons>` |
+| Accent colour usage | `<…>` |
+| Section padding | `<standard / hero>` |
+| Heading font | `<family, weight, letter-spacing>` |
+| Animation | `<…>` |
+
+Scales: backgrounds `<tokens>`; heading `<clamp steps>`; body `<standard / secondary>`; card styles `<…>`; accent formats `<…>`; images from `<dir>`.
+
+## Mobile Layout
+
+<!-- Read by /mobile-view. Record each non-obvious constraint the first time it bites. -->
+
+| Element | Rule |
+|---|---|
+| _(none recorded yet)_ | |
 
 ## Scope, Delegation, Length
 
-**Scope.** Deliver what was asked, at the scope intended. Make routine judgment calls yourself; check in only when different readings of the request lead to materially different work. If the request looks mistaken or a better approach exists, say so in a sentence and build what was asked — never quietly narrow, widen, or transform it. Finish the whole task, and stop short of anything clearly beyond it.
+**Scope.** Deliver what was asked, at the scope intended. Make routine judgment calls yourself; check in only when different readings of the request lead to materially different work. If the request looks mistaken or a better approach exists, say so in a sentence and build what was asked; never quietly narrow, widen, or transform it. Finish the whole task, and stop short of anything clearly beyond it.
 
-**Delegation.** Subagents are for large, genuinely independent work: a wide multi-file investigation, or a read nobody has done yet (the cold spec review). Never spawn one to double-check work you just did — a second look at the same code with the same knowledge buys nothing. One agent beats several; keep spawn counts low.
+**Delegation.** Subagents are for large, genuinely independent work: a wide multi-file investigation, or a read nobody has done yet (the cold spec review). Never spawn one to double-check work you just did. One agent beats several; keep spawn counts low. The workflow's review gates are a standing request for subagents (`/implement`'s `spec-reviewer` cold read, the whole-branch `review` at `/finish-branch`), so they run even when a session was launched with an instruction not to spawn unless asked. In a nested layout, tell a reviewer that evidence folders (`qa-report/`, `docs/`, `plans/`) live in the outer repo, or it will report them missing.
 
-**Length.** Match written documents — PRDs, plans, issue files, handoffs, reports — to what the task needs. Cover the substance, then stop. No filler sections, restated summaries, or boilerplate. Long is not thorough.
+**Length.** Match written documents (PRDs, plans, issue files, handoffs, reports) to what the task needs. Cover the substance, then stop. Long is not thorough.
 
 ## Lanes
 
-Not every task is feature work; route before starting. Pick the lane by observable predicate, never by how small the work feels. When the lane is anything but Feature, state the lane and its predicate in one line before starting. If the predicate flips mid-work (schema gets touched, new behavior appears), stop and upgrade lanes — never finish in the wrong lane.
+Not every task is feature work; route before starting. Pick the lane by observable predicate, never by how small the work feels. When the lane is anything but Feature, state the lane and its predicate in one line before starting. If the predicate flips mid-work (schema gets touched, new behavior appears), stop and upgrade lanes.
 
 | Lane | Predicate | Route |
 |---|---|---|
-| Feature | Adds user-visible behavior, touches schema, or opens a new module — however small it feels | Workflow below, from step 1 |
-| Quick fix | Behavior-preserving or cosmetic; no schema; confined to one area | Fix → `/verify-feature` if behavior was touched (pure style: user eyeball) → `/code-review` if non-trivial → commit on a feature branch. No issue file, no spec review — there is no spec to check |
+| Feature | Adds user-visible behavior, touches schema, or opens a new module, however small it feels | Workflow below, from step 1 |
+| Quick fix | Behavior-preserving or cosmetic; no schema; confined to one area | Fix → `/verify-feature` if behavior was touched (pure style: user eyeball) → `/code-review` if non-trivial → commit on a feature branch. No issue file, no spec review |
 | Advisory | No working-tree change intended: audit, ideas, roadmap | `/improve` or `/improve-codebase-architecture`; output is plans, no gates |
-| Promote | User picks an advisory plan or finding to build | Enter the workflow at `/to-issues` with the plan path — the plan already is the PRD; don't re-grill it |
+| Promote | User picks an advisory plan or finding to build | Enter the workflow at `/to-issues` with the plan path; the plan already is the PRD, don't re-grill it |
 | Polish | Visual pass on existing UI | `/visual-spec` or `/mobile-view` loops; user-eyeball rule applies |
 | Debug | Something is broken | Investigate first; the fix then re-routes by predicate (usually Quick fix) |
 
@@ -78,10 +181,50 @@ No lane relaxes: Verification, Permissions, the default-branch guard, or `/track
 
 ## Workflow (Feature lane)
 
-1. `/grill-me` (new idea) or `/grill-with-docs` (touches existing domain concepts); a handoff doc or brief feeds the grill, answering most questions upfront
-2. `/frontend-design` first for any new UI (establish the visual language before design work; record what it establishes in `/visual-spec`'s auto-resolved table so later sections inherit it); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS)
-3. `/to-prd` then `/to-issues`
-4. `/implement` per issue. Chains the gates in order: build (`/tdd` for complex logic, `/new-migration` for schema) → `/verify-feature` (behavior changes; pure style skips the browser, user eyeballs) → review (fresh-context spec-compliance subagent, then a quick `/code-review`; the deep quality pass runs once per branch in `/finish-branch`) → delete issue file → commit on the feature branch
-5. `/finish-branch` when the branch is done: CI trio green, the deep `/code-review` of the whole branch, docs sweep, merge in the layout's required order, cleanup, then `/sharpen` (workflow friction review; cheapest-fix-first, new skills only on repeat evidence); after any push, `/watch-ci` offers to babysit Actions until green
+**A branch stops for the user exactly once, at the Go gate.** Everything after it runs unattended and ends in the report.
 
-`/track` auto-triggers on any plan with 5+ steps: checklist in `.claude/tasks/active.md`, survives context compression, no "done" until every box checked, archive on completion. `/qa-sweep` for full-app QA runs.
+1. `/grill-me` (new idea) or `/grill-with-docs` (touches existing domain concepts); a handoff doc or brief feeds the grill, answering most questions upfront
+2. `/frontend-design` first for any new UI (establish the visual language and record it in the Design System section); `/prototype` (optional); `/visual-spec` for UI work (lock visuals before markup/CSS)
+3. `/to-prd` then `/to-issues`
+4. **The Go gate**, below. One approval, then nothing asks again.
+5. `/implement` per issue. Chains the gates in order: build (`/tdd` for complex logic, `/new-migration` for schema) → `/verify-feature` (behavior changes; pure style skips the browser, user eyeballs) → the cold spec read (`spec-reviewer` subagent) → an adversarial read of the issue's own diff → delete issue file → commit on the feature branch → the report
+6. `/finish-branch` when the branch is done: CI trio green, the deep whole-branch review from its merge-base (the only review that sees how the issues interact), docs sweep, merge in the layout's required order, push, `/watch-ci` until green, cleanup, `/sharpen`, then the report
+
+### The Go gate
+
+After the grill and the slicing, post one chat block holding **only what still needs a decision**, then wait for one go. It contains open decisions, each with a recommendation: visual choices with real ambiguity, schema tradeoffs, anything the grill left unresolved. It does not contain the issue slice list, anything the grill already settled, or a recap. If nothing is genuinely open, the block is one line asking for go.
+
+After the go, only two things may interrupt the run: an ambiguity that would make the work useless if guessed wrong (it goes to the report's **Questions**, and that issue is skipped rather than stalled), and the confirmations listed under Permissions.
+
+### Reviews
+
+`/implement` runs two passes per issue: the cold spec read (were the requirements met?) and an adversarial read of the diff (assume it is broken and go looking; a spec read passes code that meets the criteria while being wrong). `/finish-branch` runs the deep pass over the whole branch. `/code-review` is the user's to type and its cloud level is billed, so unattended runs use the `review` skill. When subagents genuinely cannot run, the gate still runs, inline, and the report says it ran inline rather than cold.
+
+**Tripwire.** If three consecutive branches run the per-issue adversarial pass and it surfaces nothing the other gates would have caught, log `per-issue-review-no-yield` to `.claude/sharpen-log.md` and cut it. Reversible on evidence, not impression, in both directions.
+
+### Bugs found while building
+
+A bug found while working an issue is fixed in that issue's commit: not filed for later, not reported and left. It appears in the report under **Bugs**, as fixed. A fix that needs a product decision goes to **Questions** with the proposed fix attached.
+
+Never hand-cut issues while `/to-issues` is callable: a manual slice skips its self-quiz and produces horizontal layers instead of vertical slices.
+
+`/track` auto-triggers on any plan with 5+ steps: checklist in `.claude/tasks/active.md`, survives context compression, no "done" until every box is checked, deleted on completion (git history is the archive). `/qa-sweep` for full-app QA runs.
+
+## Parallel Sessions
+
+Two Claude sessions sometimes share one working tree. Before assuming sole ownership: `git status` for foreign uncommitted edits; read `.claude/tasks/active.md` before `/track` (use a suffixed tracker if it is someone else's); drive the browser through a named `playwright-cli` session (`-s=<task-slug>`) and never run `close-all` or `kill-all`.
+
+- **Never claim a migration number from the working tree or from memory.** Check every ref: `git log --all --name-only --format= -- <migrations-dir> | grep -oE '^<migrations-dir>/[0-9]+' | sort -t/ -k2,2n -u | tail` (paths relative to the repo root holding the migrations), and re-check at merge time. Renumbering a file later is safe on Supabase, which records migrations by timestamp and name.
+- A tracker written by another session is a claim about the world: confirm it against `git log --all` and the code before planning from it.
+- Check the staged diff for foreign hunks before every commit; commit only your own (`git diff -U0` → filtered patch → `git apply --cached --unidiff-zero`). Never `git add -A` in a shared tree.
+- Before merging, read `git log <default>..HEAD --oneline`: a commit you cannot account for is not yours to land.
+- To replay a branch, branch off the default and cherry-pick; `git cherry -v <default> <branch>` shows which commits are genuinely unique.
+- Merging needs no checkout: `git merge-base --is-ancestor <default> <branch>` then `git push . <branch>:<default>` fast-forwards without touching the tree. When the default has moved, merge in a `git worktree add` at a short path, then remove and prune it.
+- A merge that moves only outer-repo files has not changed the app: `git diff <your-commit> <merge-commit> -- <inner>` coming back empty means the tree the suite already ran green on.
+
+## Browser automation
+
+`playwright-cli` through Bash, one named session per task. Log in with the Profile's Login command and `state-load`, never `playwright-cli fill` with a password: it echoes the typed value into the transcript. Never print or "redact" a credentials file; only a script that parses it in memory touches it. Never inline a secret into a command line.
+
+- Where `element.click()` works inside `eval`, React has not re-rendered by the time the same `eval` reads the DOM: use separate `click` calls, or await between. Setting an input's value needs the native setter plus a bubbling `input` event.
+- Screenshots: always an absolute `--filename`. From Git Bash, an argument starting with `/` is rewritten into a Windows path; set `MSYS_NO_PATHCONV=1` for that call.

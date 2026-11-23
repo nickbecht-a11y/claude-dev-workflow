@@ -3,7 +3,7 @@ name: to-prd
 description: Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context, or when a grill/planning session has resolved all open decisions and is ready to become a PRD.
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT re-interview the user — the grill already resolved the decisions; synthesize what you know. The only questions this skill may ask are step 2's module checks.
+This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT re-interview the user — the grill already resolved the decisions; synthesize what you know. **This skill asks the user nothing.** Anything genuinely unresolved is carried to the Go gate (CLAUDE.md) with a recommendation, along with whatever `/to-issues` could not resolve, so the branch stops once rather than three times.
 
 **Issue tracker = local markdown files in the issues directory named in CLAUDE.md's Project Profile** (e.g. `issues/`). PRDs are named `prd-<slug>.md`. Completed files get deleted from the working tree, so check git history for prior art: `git log --diff-filter=A --name-only -- <issues-dir>`.
 
@@ -15,7 +15,7 @@ This skill takes the current conversation context and codebase understanding and
 
 A deep module (as opposed to a shallow module) is one which encapsulates a lot of functionality in a simple, testable interface which rarely changes.
 
-Check with the user that these modules match their expectations. Check with the user which modules they want tests written for.
+Decide the module boundaries and which of them get tests, and record both in the PRD's Implementation and Testing Decisions. Module shape is a judgment call the codebase answers better than the user can, and "which modules do you want tested" has one right answer often enough that asking it was theatre. Carry it to the Go gate only when two boundaries are genuinely defensible and cost materially different amounts, and then with a recommendation.
 
 3. Write the PRD using the template below, then save it to `<issues-dir>/prd-<slug>.md` with `status: ready-for-agent` in a frontmatter block. No further triage needed.
 
@@ -31,7 +31,7 @@ The solution to the problem, from the user's perspective.
 
 ## User Stories
 
-A LONG, numbered list of user stories. Each user story should be in the format of:
+A numbered list of user stories, one per distinct actor and flow the feature touches. Each user story should be in the format of:
 
 1. As an <actor>, I want a <feature>, so that <benefit>
 
@@ -39,7 +39,6 @@ A LONG, numbered list of user stories. Each user story should be in the format o
 1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
 </user-story-example>
 
-This list of user stories should be extremely extensive and cover all aspects of the feature.
 
 ## Implementation Decisions
 

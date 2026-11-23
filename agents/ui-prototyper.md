@@ -6,7 +6,7 @@ description: Fresh-context divergent UI-variation generator for the /prototype U
 # premise it was handed is the product. Nothing here ships — it is throwaway
 # exploration — so the unpredictability that disqualifies Fable for production
 # code is exactly what earns it this slot. Do not normalise this pin to Opus.
-model: claude-fable-5
+model: claude-fable-5-1
 effort: medium
 tools:
   - Read
